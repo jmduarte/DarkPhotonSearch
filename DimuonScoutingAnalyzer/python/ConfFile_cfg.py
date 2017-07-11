@@ -16,7 +16,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 
 import FWCore.Utilities.FileUtils as FileUtils
-mylist = FileUtils.loadListFromFile ('infile2.txt') 
+mylist = FileUtils.loadListFromFile ('infile3.txt') 
 readFiles = cms.untracked.vstring( *mylist)
 
 process.source = cms.Source('PoolSource', fileNames = readFiles)
@@ -27,9 +27,16 @@ process.TFileService = cms.Service("TFileService",
  #                                  closeFileFast = cms.untracked.bool(True)
 )
 
-process.demo = cms.EDAnalyzer('DimuonScoutingAnalyzer',
+## process.demo = cms.EDAnalyzer('DimuonScoutingAnalyzer',
+##      triggerResults  = cms.InputTag("TriggerResults", "", "TEST"),
+##      muons           = cms.InputTag("hltScoutingMuonPackerCalo", "", "TEST"),
+## )
+
+process.demo = cms.EDAnalyzer('HTScoutingAnalyzer',
      triggerResults  = cms.InputTag("TriggerResults", "", "TEST"),
-     muons           = cms.InputTag("hltScoutingMuonPackerCalo", "", "TEST"),
+     caloJets        = cms.InputTag("hltScoutingCaloPacker", "", "TEST"),
+     pfJets          = cms.InputTag("hltScoutingPFPacker", "", "TEST"),
+     muons           = cms.InputTag("hltScoutingMuonPacker", "", "TEST"),
 )
 
 
