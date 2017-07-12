@@ -62,6 +62,9 @@ class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources
   int passMonitoringTrig;
   double HT;
   double mjj;
+  double mjjWide; 
+  double deltaEtajjWide;
+  double deltaPhijjWide;
 
   TH1F *h1_HT_nominal_monitoring;
   TH1F *h1_HT_monitoring;
@@ -69,6 +72,12 @@ class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources
   TH1F *h1_mjj_nominal_monitoring;
   TH1F *h1_mjj_monitoring;
   TH1F *h1_mjj_nominal;
+  TH1F *h1_mjjWide_nominal_monitoring;
+  TH1F *h1_mjjWide_monitoring;
+  TH1F *h1_mjjWide_nominal;
+  TH1F *h1_deltaEtajjWide_nominal_monitoring;
+  TH1F *h1_deltaEtajjWide_monitoring;
+  TH1F *h1_deltaEtajjWide_nominal;
 
 };
 
@@ -87,6 +96,19 @@ HTScoutingAnalyzer::HTScoutingAnalyzer(const edm::ParameterSet& iConfig)
   h1_HT_nominal_monitoring = histoDir.make<TH1F>("HT_nominal_monitoring", "HT_nominal_monitoring", 14000, 0, 14000);
   h1_HT_nominal            = histoDir.make<TH1F>("HT_nominal", "HT_nominal", 14000, 0, 14000);
   h1_HT_monitoring         = histoDir.make<TH1F>("HT_monitoring", "HT_monitoring", 14000, 0, 14000);
+
+  h1_mjj_nominal_monitoring = histoDir.make<TH1F>("mjj_nominal_monitoring", "mjj_nominal_monitoring", 14000, 0, 14000);
+  h1_mjj_nominal            = histoDir.make<TH1F>("mjj_nominal", "mjj_nominal", 14000, 0, 14000);
+  h1_mjj_monitoring         = histoDir.make<TH1F>("mjj_monitoring", "mjj_monitoring", 14000, 0, 14000);
+  
+  h1_mjjWide_nominal_monitoring = histoDir.make<TH1F>("mjjWide_nominal_monitoring", "mjjWide_nominal_monitoring", 14000, 0, 14000);
+  h1_mjjWide_nominal            = histoDir.make<TH1F>("mjjWide_nominal", "mjjWide_nominal", 14000, 0, 14000);
+  h1_mjjWide_monitoring         = histoDir.make<TH1F>("mjjWide_monitoring", "mjjWide_monitoring", 14000, 0, 14000);
+  
+  h1_deltaEtajjWide_nominal_monitoring = histoDir.make<TH1F>("deltaEtajjWide_nominal_monitoring", "deltaEtajjWide_nominal_monitoring", 1000, 0, 5);
+  h1_deltaEtajjWide_nominal            = histoDir.make<TH1F>("deltaEtajjWide_nominal", "deltaEtajjWide_nominal", 1000, 0, 5);
+  h1_deltaEtajjWide_monitoring         = histoDir.make<TH1F>("deltaEtajjWide_monitoring", "deltaEtajjWide_monitoring", 1000, 0, 5);
+  
   
 }
 
@@ -107,6 +129,9 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    passMonitoringTrig=99;
    HT=0.0;
    mjj=0.0;
+   mjjWide = 0; 
+   deltaEtajjWide = -1;
+   deltaPhijjWide = -1;
    edm::Handle<edm::TriggerResults> trgResultsHandle;
    iEvent.getByToken(trgResultsLabel_, trgResultsHandle);
    
@@ -143,10 +168,97 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
      if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) HT += iCj->pt();
    }
 
-   if (passNominalTrig && passMonitoringTrig) h1_HT_nominal_monitoring->Fill(HT) ;
-   if (passNominalTrig) h1_HT_nominal->Fill(HT) ;
-   if (passMonitoringTrig) h1_HT_monitoring->Fill(HT) ;
+   
+   for (ScoutingCaloJetCollection::const_iterator iCj = caloJetHandle->begin(); iCj != caloJetHandle->end(); ++iCj) {
+     for (ScoutingCaloJetCollection::const_iterator jCj = iCj+1; jCj != caloJetHandle->end(); ++jCj) {
+       if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) {	 
+	 if (jCj->pt() > 40. && fabs(jCj->eta()) < 3.0) {	   
+	   TLorentzVector cj1, cj2 ;
+	   cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
+	   cj2.SetPtEtaPhiM(jCj->pt(), jCj->eta(), jCj->phi(), jCj->m());	   
+	   TLorentzVector diJet=cj1+cj2;
+	   if (diJet.M()>mjj)   mjj=diJet.M();	   
+	 }
+       }
+     }
+   }
 
+
+   
+   TLorentzVector wj1, wj2, wdijet;
+   TLorentzVector wj1_tmp, wj2_tmp;
+   double wideJetDeltaR_ = 1.1;
+
+   if (caloJetHandle->size() > 2){
+     const ScoutingCaloJet & iCj = (*caloJetHandle)[ 0 ];
+     const ScoutingCaloJet & jCj = (*caloJetHandle)[ 1 ];
+     if (iCj.pt() > 40. && fabs(iCj.eta()) < 3.0) {	 
+       if (jCj.pt() > 40. && fabs(jCj.eta()) < 3.0) {
+	 TLorentzVector jet1, jet2;
+	 jet1.SetPtEtaPhiM(iCj.pt(), iCj.eta(), iCj.phi(), iCj.m());
+	 jet2.SetPtEtaPhiM(jCj.pt(), jCj.eta(), jCj.phi(), jCj.m());
+	 for (ScoutingCaloJetCollection::const_iterator kCj = caloJetHandle->begin(); kCj != caloJetHandle->end(); ++kCj) {
+	   TLorentzVector currentJet;
+	   if (kCj->pt() > 40. && fabs(kCj->eta()) < 3.0) {
+	     currentJet.SetPtEtaPhiM(kCj->pt(), kCj->eta(), kCj->phi(), kCj->m());			   
+	     double DeltaR1 = currentJet.DeltaR(jet1);
+	     double DeltaR2 = currentJet.DeltaR(jet2);			   
+	     if(DeltaR1 < DeltaR2 && DeltaR1 < wideJetDeltaR_)
+	       {
+		 wj1_tmp += currentJet;
+	       }
+	     else if(DeltaR2 < wideJetDeltaR_)
+	       {
+		 wj2_tmp += currentJet;
+	       }			 
+	   } // if AK4 jet passes fid and jetid.
+	 } //end of ak4 jet loop		     
+
+       } //fid, jet id, pt cut
+     } //fid, jet id, pt cut
+   } // end of two jets.
+	 
+   // Re-order the wide jets in pt
+   if( wj1_tmp.Pt() > wj2_tmp.Pt())
+     {
+       wj1 = wj1_tmp;
+       wj2 = wj2_tmp;
+     }
+   else
+     {
+       wj1 = wj2_tmp;
+       wj2 = wj1_tmp;
+     }
+   
+   if( wj1.Pt()>0 && wj2.Pt()>0 )
+     {
+       // Create dijet system
+       wdijet = wj1 + wj2;
+       mjjWide = wdijet.M();
+       deltaEtajjWide = fabs(wj1.Eta()-wj2.Eta());
+       deltaPhijjWide = fabs(wj1.DeltaPhi(wj2));
+     }
+
+   
+   if (passNominalTrig && passMonitoringTrig) {
+     h1_HT_nominal_monitoring->Fill(HT) ;
+     h1_mjj_nominal_monitoring->Fill(mjj) ;
+     h1_mjjWide_nominal_monitoring->Fill(mjjWide) ;
+     h1_deltaEtajjWide_nominal_monitoring->Fill(deltaEtajjWide) ;
+   }
+   if (passNominalTrig) {
+     h1_HT_nominal->Fill(HT) ;
+     h1_mjj_nominal->Fill(mjj) ;
+     h1_mjjWide_nominal->Fill(mjjWide) ;
+     h1_deltaEtajjWide_nominal->Fill(deltaEtajjWide) ;
+   }
+   if (passMonitoringTrig) {
+     h1_HT_monitoring->Fill(HT) ;
+     h1_mjj_monitoring->Fill(mjj) ;
+     h1_mjjWide_monitoring->Fill(mjjWide) ;
+     h1_deltaEtajjWide_monitoring->Fill(deltaEtajjWide) ;
+   }
+   
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
    Handle<ExampleData> pIn;
