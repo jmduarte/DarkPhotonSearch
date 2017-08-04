@@ -168,23 +168,7 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
      if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) HT += iCj->pt();
    }
 
-   
-   for (ScoutingCaloJetCollection::const_iterator iCj = caloJetHandle->begin(); iCj != caloJetHandle->end(); ++iCj) {
-     for (ScoutingCaloJetCollection::const_iterator jCj = iCj+1; jCj != caloJetHandle->end(); ++jCj) {
-       if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) {	 
-	 if (jCj->pt() > 40. && fabs(jCj->eta()) < 3.0) {	   
-	   TLorentzVector cj1, cj2 ;
-	   cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
-	   cj2.SetPtEtaPhiM(jCj->pt(), jCj->eta(), jCj->phi(), jCj->m());	   
-	   TLorentzVector diJet=cj1+cj2;
-	   if (diJet.M()>mjj)   mjj=diJet.M();	   
-	 }
-       }
-     }
-   }
-
-
-   
+      
    TLorentzVector wj1, wj2, wdijet;
    TLorentzVector wj1_tmp, wj2_tmp;
    double wideJetDeltaR_ = 1.1;
@@ -192,14 +176,15 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    if (caloJetHandle->size() > 2){
      const ScoutingCaloJet & iCj = (*caloJetHandle)[ 0 ];
      const ScoutingCaloJet & jCj = (*caloJetHandle)[ 1 ];
-     if (iCj.pt() > 40. && fabs(iCj.eta()) < 3.0) {	 
-       if (jCj.pt() > 40. && fabs(jCj.eta()) < 3.0) {
+     if (iCj.pt() > 60. && fabs(iCj.eta()) < 2.5) {	 
+       if (jCj.pt() > 30. && fabs(jCj.eta()) < 2.5) {
 	 TLorentzVector jet1, jet2;
 	 jet1.SetPtEtaPhiM(iCj.pt(), iCj.eta(), iCj.phi(), iCj.m());
 	 jet2.SetPtEtaPhiM(jCj.pt(), jCj.eta(), jCj.phi(), jCj.m());
+	 mjj = (jet1+jet2).M();
 	 for (ScoutingCaloJetCollection::const_iterator kCj = caloJetHandle->begin(); kCj != caloJetHandle->end(); ++kCj) {
 	   TLorentzVector currentJet;
-	   if (kCj->pt() > 40. && fabs(kCj->eta()) < 3.0) {
+	   if (kCj->pt() > 30. && fabs(kCj->eta()) < 2.5) {
 	     currentJet.SetPtEtaPhiM(kCj->pt(), kCj->eta(), kCj->phi(), kCj->m());			   
 	     double DeltaR1 = currentJet.DeltaR(jet1);
 	     double DeltaR2 = currentJet.DeltaR(jet2);			   
