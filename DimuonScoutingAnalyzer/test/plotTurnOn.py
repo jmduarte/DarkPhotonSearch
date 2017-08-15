@@ -142,7 +142,7 @@ if __name__ == '__main__':
     if 'HT250' in options.numerator:
         l.DrawLatex(0.12,0.88,"signal:       %s"%('DST_HT250_CaloScouting'))
     else:
-        l.DrawLatex(0.12,0.88,"signal:       %s"%('DST_HT410_CaloScouting'))
+        l.DrawLatex(0.12,0.88,"signal:       %s"%('DST_HT410_PFScouting'))
     l.DrawLatex(0.12,0.85,"reference:  %s"%('HLT_Mu50'))
     c.Print(options.outDir+"/"+"scoutingHltEff_" + options.numerator.split('/')[-1] + ".pdf")
     c.Print(options.outDir+"/"+"scoutingHltEff_" + options.numerator.split('/')[-1] + ".C")
