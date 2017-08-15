@@ -15,25 +15,34 @@ if __name__ == '__main__':
     config = config()
 
     dataset = {
-        'SingleMuon-Run2017B' : '/SingleMuon/Run2017B-v1/RAW',
-        'SingleMuon-Run2017C' : '/SingleMuon/Run2017C-v1/RAW',
+        'SingleMuon-Run2017B-PromptReco-v1' : '/SingleMuon/Run2017B-PromptReco-v1/MINIAOD',
+        'SingleMuon-Run2017B-PromptReco-v2' : '/SingleMuon/Run2017B-PromptReco-v2/MINIAOD',
+        'SingleMuon-Run2017C-PromptReco-v1' : '/SingleMuon/Run2017C-PromptReco-v1/MINIAOD',
+        'SingleMuon-Run2017C-PromptReco-v2' : '/SingleMuon/Run2017C-PromptReco-v2/MINIAOD',
+        'SingleMuon-Run2017C-PromptReco-v3' : '/SingleMuon/Run2017C-PromptReco-v3/MINIAOD',
         }
+    parent = {
+        'SingleMuon-Run2017B-PromptReco-v1' : '/SingleMuon/Run2017B-v1/RAW',
+        'SingleMuon-Run2017B-PromptReco-v2' : '/SingleMuon/Run2017B-v1/RAW',
+        'SingleMuon-Run2017C-PromptReco-v1' : '/SingleMuon/Run2017C-v1/RAW',
+        'SingleMuon-Run2017C-PromptReco-v2' : '/SingleMuon/Run2017C-v1/RAW',
+        'SingleMuon-Run2017C-PromptReco-v3' : '/SingleMuon/Run2017C-v1/RAW',
+}       
         
     nfiles = -1 
     filesPerJob = 10
     masks = {
-        'Golden' : '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-299649_13TeV_PromptReco_Collisions17_JSON.txt'
+        #'Golden' : '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-299649_13TeV_PromptReco_Collisions17_JSON.txt'
+        'DCSonly' : '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/DCSOnly/json_DCSONLY.txt'
         }
     
     for key, mask in masks.iteritems():
         config.General.transferLogs = True
-
         
         config.JobType.maxMemoryMB = 2500
         config.JobType.numCores = 4
 
-
-        name = 'ScoutingDQM'
+        name = 'ScoutingDQMv4'
         config.General.workArea = 'crab_'+name+'_'+key
         config.General.transferLogs = True
         config.JobType.pluginName = 'Analysis'
@@ -52,6 +61,7 @@ if __name__ == '__main__':
         for sample in listOfSamples:
             config.General.requestName = sample
             config.Data.inputDataset = dataset[sample]
+            config.Data.secondaryInputDataset = parent[sample]        
             config.Data.unitsPerJob = filesPerJob
             config.Data.totalUnits = nfiles
             config.Data.outputDatasetTag = sample

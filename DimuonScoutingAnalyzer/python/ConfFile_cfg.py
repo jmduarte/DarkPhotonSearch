@@ -16,7 +16,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 
 import FWCore.Utilities.FileUtils as FileUtils
-mylist = FileUtils.loadListFromFile ('infile3.txt') 
+mylist = FileUtils.loadListFromFile ('infile4.txt') 
 readFiles = cms.untracked.vstring( *mylist)
 
 process.source = cms.Source('PoolSource', fileNames = readFiles)
@@ -36,6 +36,7 @@ process.demo = cms.EDAnalyzer('HTScoutingAnalyzer',
      triggerResults  = cms.InputTag("TriggerResults", "", "TEST"),
      caloJets        = cms.InputTag("hltScoutingCaloPacker", "", "TEST"),
      pfJets          = cms.InputTag("hltScoutingPFPacker", "", "TEST"),
+     recoJets        = cms.InputTag("slimmedJets", "", "RECO"),
      muons           = cms.InputTag("hltScoutingMuonPacker", "", "TEST"),
 )
 
