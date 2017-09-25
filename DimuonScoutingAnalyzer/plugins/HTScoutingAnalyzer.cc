@@ -285,23 +285,23 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    passNominalHT410Trig=99;
    passMonitoringTrig=99;
    caloHT=0.0;
-   caloMjj=0.0;
+   caloMjj=-1;
    caloDeltaEtajj = -1;
-   caloMjjWide = 0; 
+   caloMjjWide = -1; 
    caloDeltaEtajjWide = -1;
    caloDeltaPhijjWide = -1;
    
    pfHT=0.0;
-   pfMjj=0.0;
+   pfMjj=-1;
    pfDeltaEtajj = -1;
-   pfMjjWide = 0; 
+   pfMjjWide = -1; 
    pfDeltaEtajjWide = -1;
    pfDeltaPhijjWide = -1;
    
    recoHT=0.0;
-   recoMjj=0.0;
+   recoMjj=-1;
    recoDeltaEtajj = -1;
-   recoMjjWide = 0; 
+   recoMjjWide = -1; 
    recoDeltaEtajjWide = -1;
    recoDeltaPhijjWide = -1;
    edm::Handle<edm::TriggerResults> trgResultsHandle;
@@ -312,19 +312,20 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    for (size_t i = 0; i < trgNames.size(); ++i) {
      const std::string &name = trgNames.triggerName(i);
    
-     if ( (name.find("DST_HT250_CaloScouting") != std::string::npos )) {
+     if ( (name.find("DST_HT250_CaloScouting_v") != std::string::npos )) {
        passNominalHT250Trig=trgResultsHandle->accept(i);
      }
-     if ( (name.find("DST_HT410_PFScouting") != std::string::npos )) {
+     if ( (name.find("DST_HT410_PFScouting_v") != std::string::npos )) {
        passNominalHT410Trig=trgResultsHandle->accept(i);
      }
-     if ( (name.find("HLT_Mu50") != std::string::npos )) {
+     if ( (name.find("HLT_Mu50_v") != std::string::npos )) {
        passMonitoringTrig=trgResultsHandle->accept(i);
      }
      
    }
    
-   //std::cout << passNominalHT250Trig << " " << passMonitoringTrig << std::endl;
+   //std::cout << "HT250:" << passNominalHT250Trig << " Mu50:" << passMonitoringTrig << std::endl;
+   //std::cout << "HT410:" << passNominalHT410Trig << " Mu50:" << passMonitoringTrig << std::endl;
    
    
    edm::Handle<ScoutingMuonCollection> muonHandle;
@@ -525,97 +526,97 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    
    if (passNominalHT250Trig && passMonitoringTrig) {
      h1_caloHT_nominalHT250_monitoring->Fill(caloHT) ;
-     if (caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT250_monitoring->Fill(caloMjj) ;
+     if (caloDeltaEtajj > -1 && caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT250_monitoring->Fill(caloMjj) ;
      h1_caloDeltaEtajj_nominalHT250_monitoring->Fill(caloDeltaEtajj) ;
-     if (caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT250_monitoring->Fill(caloMjjWide) ;
+     if (caloDeltaEtajjWide > -1 && caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT250_monitoring->Fill(caloMjjWide) ;
      h1_caloDeltaEtajjWide_nominalHT250_monitoring->Fill(caloDeltaEtajjWide) ;
      
      h1_pfHT_nominalHT250_monitoring->Fill(pfHT) ;
-     if (pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT250_monitoring->Fill(pfMjj) ;
+     if (pfDeltaEtajj > -1 && pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT250_monitoring->Fill(pfMjj) ;
      h1_pfDeltaEtajj_nominalHT250_monitoring->Fill(pfDeltaEtajj) ;
-     if (pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT250_monitoring->Fill(pfMjjWide) ;
+     if (pfDeltaEtajjWide > -1 && pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT250_monitoring->Fill(pfMjjWide) ;
      h1_pfDeltaEtajjWide_nominalHT250_monitoring->Fill(pfDeltaEtajjWide) ;
      
      h1_recoHT_nominalHT250_monitoring->Fill(recoHT) ;
-     if (recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT250_monitoring->Fill(recoMjj) ;
+     if (recoDeltaEtajj > -1 && recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT250_monitoring->Fill(recoMjj) ;
      h1_recoDeltaEtajj_nominalHT250_monitoring->Fill(recoDeltaEtajj) ;
-     if (recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT250_monitoring->Fill(recoMjjWide) ;
+     if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT250_monitoring->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_nominalHT250_monitoring->Fill(recoDeltaEtajjWide) ;
    }
    if (passNominalHT410Trig && passMonitoringTrig) {
      h1_caloHT_nominalHT410_monitoring->Fill(caloHT) ;
-     if (caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT410_monitoring->Fill(caloMjj) ;
+     if (caloDeltaEtajj > -1 && caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT410_monitoring->Fill(caloMjj) ;
      h1_caloDeltaEtajj_nominalHT410_monitoring->Fill(caloDeltaEtajj) ;
-     if (caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT410_monitoring->Fill(caloMjjWide) ;
+     if (caloDeltaEtajjWide > -1 && caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT410_monitoring->Fill(caloMjjWide) ;
      h1_caloDeltaEtajjWide_nominalHT410_monitoring->Fill(caloDeltaEtajjWide) ;
      
      h1_pfHT_nominalHT410_monitoring->Fill(pfHT) ;
-     if (pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT410_monitoring->Fill(pfMjj) ;
+     if (pfDeltaEtajj > -1 && pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT410_monitoring->Fill(pfMjj) ;
      h1_pfDeltaEtajj_nominalHT410_monitoring->Fill(pfDeltaEtajj) ;
-     if (pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT410_monitoring->Fill(pfMjjWide) ;
+     if (pfDeltaEtajjWide > -1 && pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT410_monitoring->Fill(pfMjjWide) ;
      h1_pfDeltaEtajjWide_nominalHT410_monitoring->Fill(pfDeltaEtajjWide) ;
      
      h1_recoHT_nominalHT410_monitoring->Fill(recoHT) ;
-     if (recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT410_monitoring->Fill(recoMjj) ;
+     if (recoDeltaEtajj > -1 && recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT410_monitoring->Fill(recoMjj) ;
      h1_recoDeltaEtajj_nominalHT410_monitoring->Fill(recoDeltaEtajj) ;
-     if (recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT410_monitoring->Fill(recoMjjWide) ;
+     if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT410_monitoring->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_nominalHT410_monitoring->Fill(recoDeltaEtajjWide) ;
    }
    if (passNominalHT250Trig) {
      h1_caloHT_nominalHT250->Fill(caloHT) ;
-     if (caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT250->Fill(caloMjj) ;
+     if (caloDeltaEtajj > -1 && caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT250->Fill(caloMjj) ;
      h1_caloDeltaEtajj_nominalHT250->Fill(caloDeltaEtajj) ;
-     if (caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT250->Fill(caloMjjWide) ;
+     if (caloDeltaEtajjWide > -1 && caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT250->Fill(caloMjjWide) ;
      h1_caloDeltaEtajjWide_nominalHT250->Fill(caloDeltaEtajjWide) ;
      
      h1_pfHT_nominalHT250->Fill(pfHT) ;
-     if (pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT250->Fill(pfMjj) ;
+     if (pfDeltaEtajj > -1 && pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT250->Fill(pfMjj) ;
      h1_pfDeltaEtajj_nominalHT250->Fill(pfDeltaEtajj) ;
-     if (pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT250->Fill(pfMjjWide) ;
+     if (pfDeltaEtajjWide > -1 && pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT250->Fill(pfMjjWide) ;
      h1_pfDeltaEtajjWide_nominalHT250->Fill(pfDeltaEtajjWide) ;
      
      h1_recoHT_nominalHT250->Fill(recoHT) ;
-     if (recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT250->Fill(recoMjj) ;
+     if (recoDeltaEtajj > -1 && recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT250->Fill(recoMjj) ;
      h1_recoDeltaEtajj_nominalHT250->Fill(recoDeltaEtajj) ;
-     if (recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT250->Fill(recoMjjWide) ;
+     if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT250->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_nominalHT250->Fill(recoDeltaEtajjWide) ;
    }
    if (passNominalHT410Trig) {
      h1_caloHT_nominalHT410->Fill(caloHT) ;
-     if (caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT410->Fill(caloMjj) ;
+     if (caloDeltaEtajj > -1 && caloDeltaEtajj < 1.3) h1_caloMjj_nominalHT410->Fill(caloMjj) ;
      h1_caloDeltaEtajj_nominalHT410->Fill(caloDeltaEtajj) ;
-     if (caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT410->Fill(caloMjjWide) ;
+     if (caloDeltaEtajjWide > -1 && caloDeltaEtajjWide < 1.3) h1_caloMjjWide_nominalHT410->Fill(caloMjjWide) ;
      h1_caloDeltaEtajjWide_nominalHT410->Fill(caloDeltaEtajjWide) ;
      
      h1_pfHT_nominalHT410->Fill(pfHT) ;
-     if (pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT410->Fill(pfMjj) ;
+     if (pfDeltaEtajj > -1 && pfDeltaEtajj < 1.3) h1_pfMjj_nominalHT410->Fill(pfMjj) ;
      h1_pfDeltaEtajj_nominalHT410->Fill(pfDeltaEtajj) ;
-     if (pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT410->Fill(pfMjjWide) ;
+     if (pfDeltaEtajjWide > -1 && pfDeltaEtajjWide < 1.3) h1_pfMjjWide_nominalHT410->Fill(pfMjjWide) ;
      h1_pfDeltaEtajjWide_nominalHT410->Fill(pfDeltaEtajjWide) ;
      
      h1_recoHT_nominalHT410->Fill(recoHT) ;
-     if (recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT410->Fill(recoMjj) ;
+     if (recoDeltaEtajj > -1 && recoDeltaEtajj < 1.3) h1_recoMjj_nominalHT410->Fill(recoMjj) ;
      h1_recoDeltaEtajj_nominalHT410->Fill(recoDeltaEtajj) ;
-     if (recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT410->Fill(recoMjjWide) ;
+     if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_nominalHT410->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_nominalHT410->Fill(recoDeltaEtajjWide) ;
    }
    if (passMonitoringTrig) {
      h1_caloHT_monitoring->Fill(caloHT) ;
-     if (caloDeltaEtajj < 1.3) h1_caloMjj_monitoring->Fill(caloMjj) ;
+     if (caloDeltaEtajj > -1 && caloDeltaEtajj < 1.3) h1_caloMjj_monitoring->Fill(caloMjj) ;
      h1_caloDeltaEtajj_monitoring->Fill(caloDeltaEtajj) ;
-     if (caloDeltaEtajjWide < 1.3) h1_caloMjjWide_monitoring->Fill(caloMjjWide) ;
+     if (caloDeltaEtajjWide > -1 && caloDeltaEtajjWide < 1.3) h1_caloMjjWide_monitoring->Fill(caloMjjWide) ;
      h1_caloDeltaEtajjWide_monitoring->Fill(caloDeltaEtajjWide) ;
      
      h1_pfHT_monitoring->Fill(pfHT) ;
-     if (pfDeltaEtajj < 1.3) h1_pfMjj_monitoring->Fill(pfMjj) ;
+     if (pfDeltaEtajj > -1 && pfDeltaEtajj < 1.3) h1_pfMjj_monitoring->Fill(pfMjj) ;
      h1_pfDeltaEtajj_monitoring->Fill(pfDeltaEtajj) ;
-     if (pfDeltaEtajjWide < 1.3) h1_pfMjjWide_monitoring->Fill(pfMjjWide) ;
+     if (pfDeltaEtajjWide > -1 && pfDeltaEtajjWide < 1.3) h1_pfMjjWide_monitoring->Fill(pfMjjWide) ;
      h1_pfDeltaEtajjWide_monitoring->Fill(pfDeltaEtajjWide) ;
      
      h1_recoHT_monitoring->Fill(recoHT) ;
-     if (recoDeltaEtajj < 1.3) h1_recoMjj_monitoring->Fill(recoMjj) ;
+     if (recoDeltaEtajj > -1 && recoDeltaEtajj < 1.3) h1_recoMjj_monitoring->Fill(recoMjj) ;
      h1_recoDeltaEtajj_monitoring->Fill(recoDeltaEtajj) ;
-     if (recoDeltaEtajjWide < 1.3) h1_recoMjjWide_monitoring->Fill(recoMjjWide) ;
+     if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_monitoring->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_monitoring->Fill(recoDeltaEtajjWide) ;
    }
    
