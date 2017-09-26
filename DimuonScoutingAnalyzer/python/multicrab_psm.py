@@ -20,7 +20,7 @@ if __name__ == '__main__':
         }
     parent = {
         'ParkingScoutingMonitor-Run2017D-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017D-v1/RAW',
-        'ParkingScoutingMonitor-Run2017E-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017D-v1/RAW',
+        'ParkingScoutingMonitor-Run2017E-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017E-v1/RAW',
         }       
         
     nfiles = -1 
