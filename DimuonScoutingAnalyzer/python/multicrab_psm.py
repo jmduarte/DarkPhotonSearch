@@ -17,10 +17,12 @@ if __name__ == '__main__':
     dataset = {
         'ParkingScoutingMonitor-Run2017D-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017D-PromptReco-v1/MINIAOD',
         'ParkingScoutingMonitor-Run2017E-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017E-PromptReco-v1/MINIAOD',
+        'ParkingScoutingMonitor-Run2017F-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017F-PromptReco-v1/MINIAOD',
         }
     parent = {
         'ParkingScoutingMonitor-Run2017D-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017D-v1/RAW',
         'ParkingScoutingMonitor-Run2017E-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017E-v1/RAW',
+        'ParkingScoutingMonitor-Run2017F-PromptReco-v1' : '/ParkingScoutingMonitor/Run2017F-v1/RAW',
         }       
         
     nfiles = -1 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
         config.JobType.maxMemoryMB = 2500
         #config.JobType.numCores = 4
 
-        name = 'ScoutingDQMv8'
+        name = 'ScoutingDQMv9'
         config.General.workArea = 'crab_'+name+'_'+key
         config.General.transferLogs = True
         config.JobType.pluginName = 'Analysis'
