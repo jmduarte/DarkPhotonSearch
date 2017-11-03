@@ -20,6 +20,8 @@
 #include <memory>
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -40,6 +42,7 @@
 #include <TLorentzVector.h>
 #include "TH1.h"
 
+
 class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
       explicit HTScoutingAnalyzer(const edm::ParameterSet&);
@@ -56,6 +59,7 @@ class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources
   // ----------member data ---------------------------
   edm::EDGetTokenT<edm::TriggerResults>            trgResultsLabel_;
   edm::EDGetTokenT<ScoutingCaloJetCollection>      caloJetLabel_;
+  edm::EDGetTokenT<double>                         caloRhoLabel_;
   edm::EDGetTokenT<ScoutingPFJetCollection>        pfJetLabel_;
   edm::EDGetTokenT<pat::JetCollection>             recoJetLabel_;
   edm::EDGetTokenT<ScoutingMuonCollection>         muonLabel_;
@@ -64,6 +68,7 @@ class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources
   int passNominalHT250Trig;
   int passNominalHT410Trig;
   int passMonitoringTrig;
+  double caloRho;
   double caloHT;
   double caloMjj;
   double caloDeltaEtajj;
@@ -161,12 +166,25 @@ class HTScoutingAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources
   TH1F *h1_recoDeltaEtajjWide_nominalHT250;
   TH1F *h1_recoDeltaEtajjWide_nominalHT410;
 
+  // for JECs
+  bool doJECs_;
+  edm::FileInPath L1corrAK4_DATA_, L2corrAK4_DATA_, L3corrAK4_DATA_,ResCorrAK4_DATA_;
+  JetCorrectorParameters *L1ParAK4_DATA;
+  JetCorrectorParameters *L2ParAK4_DATA;
+  JetCorrectorParameters *L3ParAK4_DATA;
+  JetCorrectorParameters *L2L3ResAK4_DATA;
+  FactorizedJetCorrector *JetCorrectorAK4_DATA;
 };
 
 
 HTScoutingAnalyzer::HTScoutingAnalyzer(const edm::ParameterSet& iConfig)
 
 {
+  doJECs_                  = iConfig.getParameter<bool>("doJECs");
+  L1corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L1corrAK4_DATA");
+  L2corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L2corrAK4_DATA");
+  L3corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4_DATA");
+  caloRhoLabel_            = consumes<double>(iConfig.getParameter<edm::InputTag>("caloRho")),
   trgResultsLabel_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
   caloJetLabel_            = consumes<ScoutingCaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJets"));
   pfJetLabel_              = consumes<ScoutingPFJetCollection>(iConfig.getParameter<edm::InputTag>("pfJets"));
@@ -266,7 +284,21 @@ HTScoutingAnalyzer::HTScoutingAnalyzer(const edm::ParameterSet& iConfig)
   h1_recoDeltaEtajjWide_nominalHT410            = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT410", "recoDeltaEtajjWide_nominalHT410", 1000, 0, 5);
   h1_recoDeltaEtajjWide_monitoring         = histoDir.make<TH1F>("recoDeltaEtajjWide_monitoring", "recoDeltaEtajjWide_monitoring", 1000, 0, 5);
   
+
+  if (doJECs_) {
+    L1ParAK4_DATA = new JetCorrectorParameters(L1corrAK4_DATA_.fullPath());
+    L2ParAK4_DATA = new JetCorrectorParameters(L2corrAK4_DATA_.fullPath());
+    L3ParAK4_DATA = new JetCorrectorParameters(L3corrAK4_DATA_.fullPath());
+
+    std::vector<JetCorrectorParameters> vParAK4_DATA;
+    vParAK4_DATA.push_back(*L1ParAK4_DATA);
+    vParAK4_DATA.push_back(*L2ParAK4_DATA);
+    vParAK4_DATA.push_back(*L3ParAK4_DATA);
+
+    JetCorrectorAK4_DATA = new FactorizedJetCorrector(vParAK4_DATA);
+  }
 }
+
 
 
 HTScoutingAnalyzer::~HTScoutingAnalyzer()
@@ -334,18 +366,42 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    edm::Handle<ScoutingCaloJetCollection> caloJetHandle;
    iEvent.getByToken(caloJetLabel_, caloJetHandle);
    
+   edm::Handle<double> caloRhoHandle;
+   iEvent.getByToken(caloRhoLabel_, caloRhoHandle);
+   caloRho = *caloRhoHandle;
+
    edm::Handle<ScoutingPFJetCollection> pfJetHandle;
    iEvent.getByToken(pfJetLabel_, pfJetHandle);
 
    edm::Handle<pat::JetCollection> recoJetHandle;
    iEvent.getByToken(recoJetLabel_, recoJetHandle);
    
-   
+   //JEC factors
+   std::vector<double> jecFactorsAK4;
+   // Sort AK4 jets by increasing pT
+   std::vector<unsigned> sortedAK4JetIdx;
+   std::multimap<double, unsigned> sortedAK4Jets;
+
    for (ScoutingCaloJetCollection::const_iterator iCj = caloJetHandle->begin(); iCj != caloJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
-     cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
-     if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) caloHT += iCj->pt();
+     double correction = 1.0;
+     if (doJECs_) {
+       JetCorrectorAK4_DATA->setJetEta(iCj->eta());
+       JetCorrectorAK4_DATA->setJetPt(iCj->pt());
+       JetCorrectorAK4_DATA->setJetA(iCj->jetArea());
+       JetCorrectorAK4_DATA->setRho(caloRho);
+       correction = JetCorrectorAK4_DATA->getCorrection();
+     }
+     jecFactorsAK4.push_back(correction);
+     cj1.SetPtEtaPhiM(iCj->pt()*correction, iCj->eta(), iCj->phi(), iCj->m());
+     sortedAK4Jets.insert(std::make_pair(cj1.Pt(), iCj - caloJetHandle->begin()));
+     if (cj1.Pt() > 40. && fabs(cj1.Eta()) < 3.0) caloHT += cj1.Pt();
    }
+   // Get jet indices in decreasing pT order
+   for (std::multimap<double, unsigned>::const_reverse_iterator it=sortedAK4Jets.rbegin(); it!=sortedAK4Jets.rend(); ++it) {
+     sortedAK4JetIdx.push_back(it->second);
+   }
+   
 
    for (ScoutingPFJetCollection::const_iterator iCj = pfJetHandle->begin(); iCj != pfJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
@@ -364,19 +420,20 @@ HTScoutingAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    if (caloJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
-     const ScoutingCaloJet & iCj = (*caloJetHandle)[ 0 ];
-     const ScoutingCaloJet & jCj = (*caloJetHandle)[ 1 ];
-     if (iCj.pt() > 60. && fabs(iCj.eta()) < 2.5) {	 
-       if (jCj.pt() > 30. && fabs(jCj.eta()) < 2.5) {
-	 TLorentzVector jet1, jet2;
-	 jet1.SetPtEtaPhiM(iCj.pt(), iCj.eta(), iCj.phi(), iCj.m());
-	 jet2.SetPtEtaPhiM(jCj.pt(), jCj.eta(), jCj.phi(), jCj.m());
+     const ScoutingCaloJet & iCj = (*caloJetHandle)[ sortedAK4JetIdx[0] ];
+     const ScoutingCaloJet & jCj = (*caloJetHandle)[ sortedAK4JetIdx[1] ];
+     TLorentzVector jet1, jet2;
+     jet1.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[0] ]*(iCj.pt()), iCj.eta(), iCj.phi(), iCj.m());
+     jet2.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[1] ]*(jCj.pt()), jCj.eta(), jCj.phi(), jCj.m());
+     if (jet1.Pt() > 60. && fabs(jet1.Eta()) < 2.5) {	 
+       if (jet2.Pt() > 30. && fabs(jet2.Eta()) < 2.5) {
 	 caloMjj = (jet1+jet2).M();
 	 caloDeltaEtajj = fabs(jet1.Eta()-jet2.Eta());
-	 for (ScoutingCaloJetCollection::const_iterator kCj = caloJetHandle->begin(); kCj != caloJetHandle->end(); ++kCj) {
+	 for(size_t ijet=0; ijet<caloJetHandle->size(); ijet++) {
+	   const ScoutingCaloJet & kCj = (*caloJetHandle)[ sortedAK4JetIdx[ijet] ];
 	   TLorentzVector currentJet;
-	   if (kCj->pt() > 30. && fabs(kCj->eta()) < 2.5) {
-	     currentJet.SetPtEtaPhiM(kCj->pt(), kCj->eta(), kCj->phi(), kCj->m());			   
+	   currentJet.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[ijet] ]*(kCj.pt()), kCj.eta(), kCj.phi(), kCj.m());	     
+	   if (currentJet.Pt() > 30. && fabs(currentJet.Eta()) < 2.5) {
 	     double DeltaR1 = currentJet.DeltaR(jet1);
 	     double DeltaR2 = currentJet.DeltaR(jet2);			   
 	     if(DeltaR1 < DeltaR2 && DeltaR1 < wideJetDeltaR_)

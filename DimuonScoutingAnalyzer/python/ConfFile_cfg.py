@@ -40,8 +40,14 @@ process.TFileService = cms.Service("TFileService",
 ## )
 
 process.demo = cms.EDAnalyzer('HTScoutingAnalyzer',
+     ## JECs ################
+     doJECs          = cms.bool(True),
+     L1corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/92X_dataRun2_HLT_v7/92X_dataRun2_HLT_v7_L1FastJet_AK4CaloHLT.txt'),
+     L2corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/92X_dataRun2_HLT_v7/92X_dataRun2_HLT_v7_L2Relative_AK4CaloHLT.txt'),
+     L3corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/92X_dataRun2_HLT_v7/92X_dataRun2_HLT_v7_L3Absolute_AK4CaloHLT.txt'),
      triggerResults  = cms.InputTag("TriggerResults", "", "HLT"),
      caloJets        = cms.InputTag("hltScoutingCaloPacker", "", "HLT"),
+     caloRho         = cms.InputTag("hltScoutingCaloPacker", "rho", "HLT"),
      pfJets          = cms.InputTag("hltScoutingPFPacker", "", "HLT"),
      recoJets        = cms.InputTag("slimmedJets", "", "RECO"),
      muons           = cms.InputTag("hltScoutingMuonPacker", "", "HLT"),
