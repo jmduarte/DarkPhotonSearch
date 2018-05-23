@@ -60,12 +60,21 @@ cp setup_dev_CMSSW_9_2_0_GRun_cff.py ../python/
 voms-proxy-init --voms cms
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 
-# submit SingleMuon Run2017B and Run2017C using python script
+# if HLT is needed to run ourself,submit SingleMuon Run2017B and Run2017C using python script
+cd $CMSSW_BASE/src/DarkPhotonSearch/DimuonScoutingAnalyzer/test
 python multicrab_data.py
 
 # once your crab jobs finish get the list of output files and put them in infile3.txt then you can do
+# if HLT is online, run on ParkingScoutingMonotor dataset
 cd $CMSSW_BASE/src/DarkPhotonSearch/DimuonScoutingAnalyzer/python
+
+# run locally
 cmsRun ConfFile_cfg.py
+
+# run on grid
+python multicrab_psm.py
+
+
 # then you can plot the HT or mjj turn-on
 cd $CMSSW_BASE/src/DarkPhotonSearch/DimuonScoutingAnalyzer/test
 source plotTurnOns.sh
