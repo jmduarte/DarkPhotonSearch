@@ -29,23 +29,37 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerResultsByName.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Scouting/interface/ScoutingMuon.h"
 #include "DataFormats/Scouting/interface/ScoutingPFJet.h"
 #include "DataFormats/Scouting/interface/ScoutingCaloJet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/TriggerPrimitive.h"
+//#include "DataFormats/PatCandidates/interface/TriggerPrimitive.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include <TLorentzVector.h>
 #include "TH1.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
+#include "Math/VectorUtil.h"
+
+#include <cassert>
+
+using namespace reco;
+using namespace edm;
 
 
 class HTScoutingJetMatchAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+        typedef math::XYZTLorentzVectorF LorentzVector;
+
    public:
       explicit HTScoutingJetMatchAnalyzer(const edm::ParameterSet&);
       ~HTScoutingJetMatchAnalyzer();
@@ -67,7 +81,17 @@ class HTScoutingJetMatchAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedR
   edm::EDGetTokenT<pat::JetCollection>             recoJetLabel_;
   edm::EDGetTokenT<ScoutingMuonCollection>         muonLabel_;
   edm::Service<TFileService> fs;
-  edm::OwnVector<pat::TriggerPrimitive> patTriggerPrimitivesOwned_myTrigObjects_;
+  //edm::OwnVector<pat::TriggerPrimitive> patTriggerPrimitivesOwned_myTrigObjects_;
+
+  std::string   processName_;
+  std::string triggerName_;
+
+  double tagPt_;
+  double tagEta_;
+  double probePt_;
+  double probeEta_;
+
+  HLTConfigProvider hltConfig_;
 
   int passNominalHT250Trig;
   int passNominalHT410Trig;
@@ -200,7 +224,7 @@ HTScoutingJetMatchAnalyzer::HTScoutingJetMatchAnalyzer(const edm::ParameterSet& 
   L3corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4_DATA");
   caloRhoLabel_            = consumes<double>(iConfig.getParameter<edm::InputTag>("caloRho")),
   trgResultsLabel_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
-  trgObjStandAloneLabel_ = consumes<pat::TriggerObjectStandAloneCollection> (ps.getUntrackedParameter<edm::InputTag>("triggerObjectsStandAlone", edm::InputTag("selectedPatTrigger")));
+  trgObjStandAloneLabel_ = consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getUntrackedParameter<edm::InputTag>("triggerObjectsStandAlone", edm::InputTag("selectedPatTrigger")));
   caloJetLabel_            = consumes<ScoutingCaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJets"));
   pfJetLabel_              = consumes<ScoutingPFJetCollection>(iConfig.getParameter<edm::InputTag>("pfJets"));
   recoJetLabel_            = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("recoJets"));
@@ -336,8 +360,9 @@ HTScoutingJetMatchAnalyzer::~HTScoutingJetMatchAnalyzer()
 // member functions
 //
 //____________________________________________________________________________
+/*
 void
-HTScoutingJetMatchAnalyzer::beginRun(const edm::Run const & iRun, const edm::EventSetup& iSetup)
+HTScoutingJetMatchAnalyzer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
         using namespace std;
         using namespace edm;
@@ -361,8 +386,7 @@ HTScoutingJetMatchAnalyzer::beginRun(const edm::Run const & iRun, const edm::Eve
         }
 
 }
-}
-
+*/
 
 // ------------ method called for each event  ------------
 void
@@ -476,7 +500,7 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
    std::vector<LorentzVector> trigJets;
    for (size_t i = 0; i < trgNames.size(); ++i) {
         const std::string &name = trgNames.triggerName(i);
-        for (pat::TriggerObjectStandAlone obj : *triggerOSA_) {
+        for (pat::TriggerObjectStandAlone obj : *trgOSA) {
                 obj.unpackPathNames(name);
                 if ( !obj.id(85) ) continue; // jet type id (mu 83 jet 85)
                 if ( !obj.hasPathName( name, true, true ) ) continue; // checks if object is associated to last filter (true) and L3 filter (true)
@@ -495,8 +519,7 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
 
   const float dr_trigmatch = 0.4;
 
-  View<pat::Jet>::const_iterator jets_end = recoJetHandle_->end(); // Iterator
-  for ( View<pat::Jet>::const_iterator jet_tag = recoJetHandle_->begin(); jet_tag != jets_end; ++jet_tag ) {
+  for (pat::JetCollection::const_iterator jet_tag = recoJetHandle->begin(); jet_tag != recoJetHandle->end(); ++jet_tag) {	   
           cout << " - tag cand: pt: " << jet_tag->pt() << ", eta: " << jet_tag->eta()
                   << ", phi: " << jet_tag->phi() << endl;
 
@@ -512,7 +535,7 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
           if (!trigmatch_tag) continue;
 
           // good tag jet: look for any probe jets in the event
-          for ( View<pat::Jet>::const_iterator jet_probe = musHandle_->begin(); jet_probe != jets_end; ++jet_probe ) {
+          for (pat::JetCollection::const_iterator jet_probe = recoJetHandle->begin(); jet_probe != recoJetHandle->end(); ++jet_probe) {	   
                   // make sure probe isn't the same as the tag
                   if (ROOT::Math::VectorUtil::DeltaR(jet_tag->p4(),jet_probe->p4()) < 0.01) continue;
 
@@ -530,8 +553,8 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
 
                   // check if probe jet matches trigger
                   bool trigmatch_probe = false;
-                  for (unsigned int itrig=0; itrig < trigMuons.size(); ++itrig) {
-                          if (ROOT::Math::VectorUtil::DeltaR(jet_probe->p4(),trigMuons.at(itrig)) < dr_trigmatch) trigmatch_probe = true;
+                  for (unsigned int itrig=0; itrig < trigJets.size(); ++itrig) {
+                          if (ROOT::Math::VectorUtil::DeltaR(jet_probe->p4(),trigJets.at(itrig)) < dr_trigmatch) trigmatch_probe = true;
                   }
 
           } // loop over probe
