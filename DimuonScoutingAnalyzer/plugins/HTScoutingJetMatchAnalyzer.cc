@@ -224,7 +224,7 @@ HTScoutingJetMatchAnalyzer::HTScoutingJetMatchAnalyzer(const edm::ParameterSet& 
   L3corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4_DATA");
   caloRhoLabel_            = consumes<double>(iConfig.getParameter<edm::InputTag>("caloRho")),
   trgResultsLabel_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
-  trgObjStandAloneLabel_ = consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getUntrackedParameter<edm::InputTag>("triggerObjectsStandAlone", edm::InputTag("selectedPatTrigger")));
+  trgObjStandAloneLabel_   = consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("triggerObjectsStandAlone"));
   caloJetLabel_            = consumes<ScoutingCaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJets"));
   pfJetLabel_              = consumes<ScoutingPFJetCollection>(iConfig.getParameter<edm::InputTag>("pfJets"));
   recoJetLabel_            = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("recoJets"));
@@ -500,17 +500,45 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
    std::vector<LorentzVector> trigJets;
    for (size_t i = 0; i < trgNames.size(); ++i) {
         const std::string &name = trgNames.triggerName(i);
-        for (pat::TriggerObjectStandAlone obj : *trgOSA) {
-                obj.unpackPathNames(name);
-                if ( !obj.id(85) ) continue; // jet type id (mu 83 jet 85)
-                if ( !obj.hasPathName( name, true, true ) ) continue; // checks if object is associated to last filter (true) and L3 filter (true)
-                trigJets.push_back(LorentzVector(obj.p4()));
-                cout << "  - pt: " << obj.pt() << ", eta: " << obj.eta() << ", phi: " << obj.phi() << endl;
-        } // loop on trigger objects
+	cout << name << endl;
    } // loop over trigger names
+   const std::string &name = "DST_HT250_CaloScouting_v";
+   for (pat::TriggerObjectStandAlone obj : *trgOSA) {
+     obj.unpackPathNames(trgNames);
 
+     for (unsigned h = 0; h < obj.filterIds().size(); ++h) std::cout << " " << obj.filterIds()[h] ;
+     std::cout << std::endl;
+     // Print associated trigger filters
+     std::cout << "\t   Filters:    ";
+     for (unsigned h = 0; h < obj.filterLabels().size(); ++h) std::cout << " " << obj.filterLabels()[h];
+     std::cout << std::endl;
+     std::vector<std::string> pathNamesAll = obj.pathNames(false);
+     std::vector<std::string> pathNamesLast = obj.pathNames(true);
+     // Print all trigger paths, for each one record also if the object is associated to a 'l3' filter (always true for the
+     // definition used in the PAT trigger producer) and if it's associated to the last filter of a successfull path (which
+     // means that this object did cause this trigger to succeed; however, it doesn't work on some multi-object triggers)
+     std::cout << "\t   Paths (" << pathNamesAll.size()<<"/"<<pathNamesLast.size()<<"):    ";
+     for (unsigned h = 0, n = pathNamesAll.size(); h < n; ++h) {
+       bool isBoth = obj.hasPathName( pathNamesAll[h], true, true );
+       bool isL3   = obj.hasPathName( pathNamesAll[h], false, true );
+       bool isLF   = obj.hasPathName( pathNamesAll[h], true, false );
+       bool isNone = obj.hasPathName( pathNamesAll[h], false, false );
+       std::cout << "   " << pathNamesAll[h];
+       if (isBoth) std::cout << "(L,3)";
+       if (isL3 && !isBoth) std::cout << "(*,3)";
+       if (isLF && !isBoth) std::cout << "(L,*)";
+       if (isNone && !isBoth && !isL3 && !isLF) std::cout << "(*,*)";
+     }
+     std::cout << std::endl;
+     //if ( !obj.id(85) ) continue; // jet type id (mu 83 jet 85)
+     //if ( !obj.hasPathName( name, true, true ) ) continue; // checks if object is associated to last filter (true) and L3 filter (true)
+     //trigJets.push_back(LorentzVector(obj.p4()));
+     //cout << "  - pt: " << obj.pt() << ", eta: " << obj.eta() << ", phi: " << obj.phi() << endl;
+   } // loop on trigger objects
+   std::cout << std::endl;
+   
   if (accept && trigJets.size() == 0) {
-         cout << "HTScoutingJetMatchAnalyzer::analyzeTrigger: ERROR!! no valid trigger leptons!" << endl;
+         cout << "HTScoutingJetMatchAnalyzer::analyzeTrigger: ERROR!! no valid trigger jets!" << endl;
   }
 
  //---------------------------------- 
@@ -518,54 +546,55 @@ HTScoutingJetMatchAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSe
  //---------------------------------- 
 
   const float dr_trigmatch = 0.4;
-
+  
   for (pat::JetCollection::const_iterator jet_tag = recoJetHandle->begin(); jet_tag != recoJetHandle->end(); ++jet_tag) {	   
-          cout << " - tag cand: pt: " << jet_tag->pt() << ", eta: " << jet_tag->eta()
-                  << ", phi: " << jet_tag->phi() << endl;
-
-          // check if jet passes tag cuts
-          if (jet_tag->pt() < tagPt_) continue;
-          if (fabs(jet_tag->eta()) > tagEta_) continue;
-
-          // check if jet matches trigger
-          bool trigmatch_tag = false;
-          for (unsigned int itrig=0; itrig < trigJets.size(); ++itrig) {
-                  if (ROOT::Math::VectorUtil::DeltaR(jet_tag->p4(),trigJets.at(itrig)) < dr_trigmatch) trigmatch_tag = true;
-          }
-          if (!trigmatch_tag) continue;
-
-          // good tag jet: look for any probe jets in the event
-          for (pat::JetCollection::const_iterator jet_probe = recoJetHandle->begin(); jet_probe != recoJetHandle->end(); ++jet_probe) {	   
-                  // make sure probe isn't the same as the tag
-                  if (ROOT::Math::VectorUtil::DeltaR(jet_tag->p4(),jet_probe->p4()) < 0.01) continue;
-
-                  // check probe cuts
-                  if (jet_probe->pt() < probePt_) continue;
-                  if (fabs(jet_probe->eta()) > probeEta_) continue;
-
-                  cout << " - probe cand: pt: " << jet_probe->pt() << ", eta: " << jet_probe->eta()
-                          << ", phi: " << jet_probe->phi() << endl;
-
-                  // dijet mass
-                  LorentzVector dijet = LorentzVector(jet_tag->p4() + jet_probe->p4());
-	          trgmatchMjj = dijet.M();
-	          trgmatchDeltaEtajj = fabs((jet_tag->p4()).Eta()-(jet_probe->p4()).Eta());
-
-                  // check if probe jet matches trigger
-                  bool trigmatch_probe = false;
-                  for (unsigned int itrig=0; itrig < trigJets.size(); ++itrig) {
-                          if (ROOT::Math::VectorUtil::DeltaR(jet_probe->p4(),trigJets.at(itrig)) < dr_trigmatch) trigmatch_probe = true;
-                  }
-
-          } // loop over probe
-
+    cout << " - tag cand: pt: " << jet_tag->pt() << ", eta: " << jet_tag->eta()
+	 << ", phi: " << jet_tag->phi() << endl;
+    
+    // check if jet passes tag cuts
+    if (jet_tag->pt() < tagPt_) continue;
+    if (fabs(jet_tag->eta()) > tagEta_) continue;
+    
+    // check if jet matches trigger
+    bool trigmatch_tag = false;
+    for (unsigned int itrig=0; itrig < trigJets.size(); ++itrig) {
+      if (ROOT::Math::VectorUtil::DeltaR(jet_tag->p4(),trigJets.at(itrig)) < dr_trigmatch) trigmatch_tag = true;
+    }
+    if (!trigmatch_tag) continue;
+    
+    // good tag jet: look for any probe jets in the event
+    for (pat::JetCollection::const_iterator jet_probe = recoJetHandle->begin(); jet_probe != recoJetHandle->end(); ++jet_probe) {	   
+      // make sure probe isn't the same as the tag
+      if (ROOT::Math::VectorUtil::DeltaR(jet_tag->p4(),jet_probe->p4()) < 0.01) continue;
+      
+      // check probe cuts
+      if (jet_probe->pt() < probePt_) continue;
+      if (fabs(jet_probe->eta()) > probeEta_) continue;
+      
+      std::cout << " - probe cand: pt: " << jet_probe->pt() << ", eta: " << jet_probe->eta()
+		<< ", phi: " << jet_probe->phi() << std::endl;
+      
+      // dijet mass
+      LorentzVector dijet = LorentzVector(jet_tag->p4() + jet_probe->p4());
+      trgmatchMjj = dijet.M();
+      trgmatchDeltaEtajj = fabs((jet_tag->p4()).Eta()-(jet_probe->p4()).Eta());
+      
+      // check if probe jet matches trigger
+      bool trigmatch_probe = false;
+      for (unsigned int itrig=0; itrig < trigJets.size(); ++itrig) {
+	if (ROOT::Math::VectorUtil::DeltaR(jet_probe->p4(),trigJets.at(itrig)) < dr_trigmatch) trigmatch_probe = true;
+      }
+      std::cout << trigmatch_probe << std::endl;
+      
+    } // loop over probe
+    
   } // loop over tag
-
-
+  
+  
   //  _____________________________________
   //  Iteraor of caloJet, pfJet and recoJet
   //  _____________________________________
-
+  
 
    //JEC factors
    std::vector<double> jecFactorsAK4;
