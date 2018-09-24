@@ -245,94 +245,139 @@ HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
   TFileDirectory histoDir = fs->mkdir("histoDir");
 
   h1_caloHT_nominalHT250_monitoring = histoDir.make<TH1F>("caloHT_nominalHT250_monitoring", "caloHT_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_caloHT_nominalHT250_l1monitoring = histoDir.make<TH1F>("caloHT_nominalHT250_l1monitoring", "caloHT_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_caloHT_nominalHT250            = histoDir.make<TH1F>("caloHT_nominalHT250", "caloHT_nominalHT250", 14000, 0, 14000);
   h1_caloHT_nominalHT410_monitoring = histoDir.make<TH1F>("caloHT_nominalHT410_monitoring", "caloHT_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_caloHT_nominalHT410_l1monitoring = histoDir.make<TH1F>("caloHT_nominalHT410_l1monitoring", "caloHT_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_caloHT_nominalHT410            = histoDir.make<TH1F>("caloHT_nominalHT410", "caloHT_nominalHT410", 14000, 0, 14000);
   h1_caloHT_monitoring         = histoDir.make<TH1F>("caloHT_monitoring", "caloHT_monitoring", 14000, 0, 14000);
+  h1_caloHT_l1monitoring         = histoDir.make<TH1F>("caloHT_l1monitoring", "caloHT_l1monitoring", 14000, 0, 14000);
 
   h1_caloMjj_nominalHT250_monitoring = histoDir.make<TH1F>("caloMjj_nominalHT250_monitoring", "caloMjj_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_caloMjj_nominalHT250_l1monitoring = histoDir.make<TH1F>("caloMjj_nominalHT250_l1monitoring", "caloMjj_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_caloMjj_nominalHT250            = histoDir.make<TH1F>("caloMjj_nominalHT250", "caloMjj_nominalHT250", 14000, 0, 14000);
   h1_caloMjj_nominalHT410_monitoring = histoDir.make<TH1F>("caloMjj_nominalHT410_monitoring", "caloMjj_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_caloMjj_nominalHT410_l1monitoring = histoDir.make<TH1F>("caloMjj_nominalHT410_l1monitoring", "caloMjj_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_caloMjj_nominalHT410            = histoDir.make<TH1F>("caloMjj_nominalHT410", "caloMjj_nominalHT410", 14000, 0, 14000);
   h1_caloMjj_monitoring         = histoDir.make<TH1F>("caloMjj_monitoring", "caloMjj_monitoring", 14000, 0, 14000);
+  h1_caloMjj_l1monitoring         = histoDir.make<TH1F>("caloMjj_l1monitoring", "caloMjj_l1monitoring", 14000, 0, 14000);
   
   h1_caloDeltaEtajj_nominalHT250_monitoring = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT250_monitoring", "caloDeltaEtajj_nominalHT250_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajj_nominalHT250_l1monitoring = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT250_l1monitoring", "caloDeltaEtajj_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_caloDeltaEtajj_nominalHT250            = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT250", "caloDeltaEtajj_nominalHT250", 1000, 0, 5);
   h1_caloDeltaEtajj_nominalHT410_monitoring = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT410_monitoring", "caloDeltaEtajj_nominalHT410_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajj_nominalHT410_l1monitoring = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT410_l1monitoring", "caloDeltaEtajj_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_caloDeltaEtajj_nominalHT410            = histoDir.make<TH1F>("caloDeltaEtajj_nominalHT410", "caloDeltaEtajj_nominalHT410", 1000, 0, 5);
   h1_caloDeltaEtajj_monitoring         = histoDir.make<TH1F>("caloDeltaEtajj_monitoring", "caloDeltaEtajj_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajj_l1monitoring         = histoDir.make<TH1F>("caloDeltaEtajj_l1monitoring", "caloDeltaEtajj_l1monitoring", 1000, 0, 5);
   
   h1_caloMjjWide_nominalHT250_monitoring = histoDir.make<TH1F>("caloMjjWide_nominalHT250_monitoring", "caloMjjWide_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_caloMjjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("caloMjjWide_nominalHT250_l1monitoring", "caloMjjWide_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_caloMjjWide_nominalHT250            = histoDir.make<TH1F>("caloMjjWide_nominalHT250", "caloMjjWide_nominalHT250", 14000, 0, 14000);
   h1_caloMjjWide_nominalHT410_monitoring = histoDir.make<TH1F>("caloMjjWide_nominalHT410_monitoring", "caloMjjWide_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_caloMjjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("caloMjjWide_nominalHT410_l1monitoring", "caloMjjWide_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_caloMjjWide_nominalHT410            = histoDir.make<TH1F>("caloMjjWide_nominalHT410", "caloMjjWide_nominalHT410", 14000, 0, 14000);
   h1_caloMjjWide_monitoring         = histoDir.make<TH1F>("caloMjjWide_monitoring", "caloMjjWide_monitoring", 14000, 0, 14000);
+  h1_caloMjjWide_l1monitoring         = histoDir.make<TH1F>("caloMjjWide_l1monitoring", "caloMjjWide_l1monitoring", 14000, 0, 14000);
   
   h1_caloDeltaEtajjWide_nominalHT250_monitoring = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT250_monitoring", "caloDeltaEtajjWide_nominalHT250_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT250_l1monitoring", "caloDeltaEtajjWide_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_caloDeltaEtajjWide_nominalHT250            = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT250", "caloDeltaEtajjWide_nominalHT250", 1000, 0, 5);
   h1_caloDeltaEtajjWide_nominalHT410_monitoring = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT410_monitoring", "caloDeltaEtajjWide_nominalHT410_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT410_l1monitoring", "caloDeltaEtajjWide_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_caloDeltaEtajjWide_nominalHT410            = histoDir.make<TH1F>("caloDeltaEtajjWide_nominalHT410", "caloDeltaEtajjWide_nominalHT410", 1000, 0, 5);
   h1_caloDeltaEtajjWide_monitoring         = histoDir.make<TH1F>("caloDeltaEtajjWide_monitoring", "caloDeltaEtajjWide_monitoring", 1000, 0, 5);
+  h1_caloDeltaEtajjWide_l1monitoring         = histoDir.make<TH1F>("caloDeltaEtajjWide_l1monitoring", "caloDeltaEtajjWide_l1monitoring", 1000, 0, 5);
 
   h1_pfHT_nominalHT250_monitoring = histoDir.make<TH1F>("pfHT_nominalHT250_monitoring", "pfHT_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_pfHT_nominalHT250_l1monitoring = histoDir.make<TH1F>("pfHT_nominalHT250_l1monitoring", "pfHT_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_pfHT_nominalHT250            = histoDir.make<TH1F>("pfHT_nominalHT250", "pfHT_nominalHT250", 14000, 0, 14000);
   h1_pfHT_nominalHT410_monitoring = histoDir.make<TH1F>("pfHT_nominalHT410_monitoring", "pfHT_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_pfHT_nominalHT410_l1monitoring = histoDir.make<TH1F>("pfHT_nominalHT410_l1monitoring", "pfHT_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_pfHT_nominalHT410            = histoDir.make<TH1F>("pfHT_nominalHT410", "pfHT_nominalHT410", 14000, 0, 14000);
   h1_pfHT_monitoring         = histoDir.make<TH1F>("pfHT_monitoring", "pfHT_monitoring", 14000, 0, 14000);
+  h1_pfHT_l1monitoring         = histoDir.make<TH1F>("pfHT_l1monitoring", "pfHT_l1monitoring", 14000, 0, 14000);
 
   h1_pfMjj_nominalHT250_monitoring = histoDir.make<TH1F>("pfMjj_nominalHT250_monitoring", "pfMjj_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_pfMjj_nominalHT250_l1monitoring = histoDir.make<TH1F>("pfMjj_nominalHT250_l1monitoring", "pfMjj_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_pfMjj_nominalHT250            = histoDir.make<TH1F>("pfMjj_nominalHT250", "pfMjj_nominalHT250", 14000, 0, 14000);
   h1_pfMjj_nominalHT410_monitoring = histoDir.make<TH1F>("pfMjj_nominalHT410_monitoring", "pfMjj_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_pfMjj_nominalHT410_l1monitoring = histoDir.make<TH1F>("pfMjj_nominalHT410_l1monitoring", "pfMjj_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_pfMjj_nominalHT410            = histoDir.make<TH1F>("pfMjj_nominalHT410", "pfMjj_nominalHT410", 14000, 0, 14000);
   h1_pfMjj_monitoring         = histoDir.make<TH1F>("pfMjj_monitoring", "pfMjj_monitoring", 14000, 0, 14000);
+  h1_pfMjj_l1monitoring         = histoDir.make<TH1F>("pfMjj_l1monitoring", "pfMjj_l1monitoring", 14000, 0, 14000);
 
   h1_pfDeltaEtajj_nominalHT250_monitoring = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT250_monitoring", "pfDeltaEtajj_nominalHT250_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajj_nominalHT250_l1monitoring = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT250_l1monitoring", "pfDeltaEtajj_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_pfDeltaEtajj_nominalHT250            = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT250", "pfDeltaEtajj_nominalHT250", 1000, 0, 5);
   h1_pfDeltaEtajj_nominalHT410_monitoring = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT410_monitoring", "pfDeltaEtajj_nominalHT410_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajj_nominalHT410_l1monitoring = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT410_l1monitoring", "pfDeltaEtajj_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_pfDeltaEtajj_nominalHT410            = histoDir.make<TH1F>("pfDeltaEtajj_nominalHT410", "pfDeltaEtajj_nominalHT410", 1000, 0, 5);
   h1_pfDeltaEtajj_monitoring         = histoDir.make<TH1F>("pfDeltaEtajj_monitoring", "pfDeltaEtajj_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajj_l1monitoring         = histoDir.make<TH1F>("pfDeltaEtajj_l1monitoring", "pfDeltaEtajj_l1monitoring", 1000, 0, 5);
   
   h1_pfMjjWide_nominalHT250_monitoring = histoDir.make<TH1F>("pfMjjWide_nominalHT250_monitoring", "pfMjjWide_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_pfMjjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("pfMjjWide_nominalHT250_l1monitoring", "pfMjjWide_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_pfMjjWide_nominalHT250            = histoDir.make<TH1F>("pfMjjWide_nominalHT250", "pfMjjWide_nominalHT250", 14000, 0, 14000);
   h1_pfMjjWide_nominalHT410_monitoring = histoDir.make<TH1F>("pfMjjWide_nominalHT410_monitoring", "pfMjjWide_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_pfMjjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("pfMjjWide_nominalHT410_l1monitoring", "pfMjjWide_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_pfMjjWide_nominalHT410            = histoDir.make<TH1F>("pfMjjWide_nominalHT410", "pfMjjWide_nominalHT410", 14000, 0, 14000);
   h1_pfMjjWide_monitoring         = histoDir.make<TH1F>("pfMjjWide_monitoring", "pfMjjWide_monitoring", 14000, 0, 14000);
+  h1_pfMjjWide_l1monitoring         = histoDir.make<TH1F>("pfMjjWide_l1monitoring", "pfMjjWide_l1monitoring", 14000, 0, 14000);
   
   h1_pfDeltaEtajjWide_nominalHT250_monitoring = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT250_monitoring", "pfDeltaEtajjWide_nominalHT250_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT250_l1monitoring", "pfDeltaEtajjWide_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_pfDeltaEtajjWide_nominalHT250            = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT250", "pfDeltaEtajjWide_nominalHT250", 1000, 0, 5);
   h1_pfDeltaEtajjWide_nominalHT410_monitoring = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT410_monitoring", "pfDeltaEtajjWide_nominalHT410_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT410_l1monitoring", "pfDeltaEtajjWide_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_pfDeltaEtajjWide_nominalHT410            = histoDir.make<TH1F>("pfDeltaEtajjWide_nominalHT410", "pfDeltaEtajjWide_nominalHT410", 1000, 0, 5);
   h1_pfDeltaEtajjWide_monitoring         = histoDir.make<TH1F>("pfDeltaEtajjWide_monitoring", "pfDeltaEtajjWide_monitoring", 1000, 0, 5);
+  h1_pfDeltaEtajjWide_l1monitoring         = histoDir.make<TH1F>("pfDeltaEtajjWide_l1monitoring", "pfDeltaEtajjWide_l1monitoring", 1000, 0, 5);
 
   h1_recoHT_nominalHT250_monitoring = histoDir.make<TH1F>("recoHT_nominalHT250_monitoring", "recoHT_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_recoHT_nominalHT250_l1monitoring = histoDir.make<TH1F>("recoHT_nominalHT250_l1monitoring", "recoHT_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_recoHT_nominalHT250            = histoDir.make<TH1F>("recoHT_nominalHT250", "recoHT_nominalHT250", 14000, 0, 14000);
   h1_recoHT_nominalHT410_monitoring = histoDir.make<TH1F>("recoHT_nominalHT410_monitoring", "recoHT_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_recoHT_nominalHT410_l1monitoring = histoDir.make<TH1F>("recoHT_nominalHT410_l1monitoring", "recoHT_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_recoHT_nominalHT410            = histoDir.make<TH1F>("recoHT_nominalHT410", "recoHT_nominalHT410", 14000, 0, 14000);
   h1_recoHT_monitoring         = histoDir.make<TH1F>("recoHT_monitoring", "recoHT_monitoring", 14000, 0, 14000);
+  h1_recoHT_l1monitoring         = histoDir.make<TH1F>("recoHT_l1monitoring", "recoHT_l1monitoring", 14000, 0, 14000);
 
   h1_recoMjj_nominalHT250_monitoring = histoDir.make<TH1F>("recoMjj_nominalHT250_monitoring", "recoMjj_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_recoMjj_nominalHT250_l1monitoring = histoDir.make<TH1F>("recoMjj_nominalHT250_l1monitoring", "recoMjj_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_recoMjj_nominalHT250            = histoDir.make<TH1F>("recoMjj_nominalHT250", "recoMjj_nominalHT250", 14000, 0, 14000);
   h1_recoMjj_nominalHT410_monitoring = histoDir.make<TH1F>("recoMjj_nominalHT410_monitoring", "recoMjj_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_recoMjj_nominalHT410_l1monitoring = histoDir.make<TH1F>("recoMjj_nominalHT410_l1monitoring", "recoMjj_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_recoMjj_nominalHT410            = histoDir.make<TH1F>("recoMjj_nominalHT410", "recoMjj_nominalHT410", 14000, 0, 14000);
   h1_recoMjj_monitoring         = histoDir.make<TH1F>("recoMjj_monitoring", "recoMjj_monitoring", 14000, 0, 14000);
+  h1_recoMjj_l1monitoring         = histoDir.make<TH1F>("recoMjj_l1monitoring", "recoMjj_l1monitoring", 14000, 0, 14000);
   
   h1_recoDeltaEtajj_nominalHT250_monitoring = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT250_monitoring", "recoDeltaEtajj_nominalHT250_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajj_nominalHT250_l1monitoring = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT250_l1monitoring", "recoDeltaEtajj_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_recoDeltaEtajj_nominalHT250            = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT250", "recoDeltaEtajj_nominalHT250", 1000, 0, 5);
   h1_recoDeltaEtajj_nominalHT410_monitoring = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT410_monitoring", "recoDeltaEtajj_nominalHT410_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajj_nominalHT410_l1monitoring = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT410_l1monitoring", "recoDeltaEtajj_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_recoDeltaEtajj_nominalHT410            = histoDir.make<TH1F>("recoDeltaEtajj_nominalHT410", "recoDeltaEtajj_nominalHT410", 1000, 0, 5);
   h1_recoDeltaEtajj_monitoring         = histoDir.make<TH1F>("recoDeltaEtajj_monitoring", "recoDeltaEtajj_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajj_l1monitoring         = histoDir.make<TH1F>("recoDeltaEtajj_l1monitoring", "recoDeltaEtajj_l1monitoring", 1000, 0, 5);
   
   h1_recoMjjWide_nominalHT250_monitoring = histoDir.make<TH1F>("recoMjjWide_nominalHT250_monitoring", "recoMjjWide_nominalHT250_monitoring", 14000, 0, 14000);
+  h1_recoMjjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("recoMjjWide_nominalHT250_l1monitoring", "recoMjjWide_nominalHT250_l1monitoring", 14000, 0, 14000);
   h1_recoMjjWide_nominalHT250            = histoDir.make<TH1F>("recoMjjWide_nominalHT250", "recoMjjWide_nominalHT250", 14000, 0, 14000);
   h1_recoMjjWide_nominalHT410_monitoring = histoDir.make<TH1F>("recoMjjWide_nominalHT410_monitoring", "recoMjjWide_nominalHT410_monitoring", 14000, 0, 14000);
+  h1_recoMjjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("recoMjjWide_nominalHT410_l1monitoring", "recoMjjWide_nominalHT410_l1monitoring", 14000, 0, 14000);
   h1_recoMjjWide_nominalHT410            = histoDir.make<TH1F>("recoMjjWide_nominalHT410", "recoMjjWide_nominalHT410", 14000, 0, 14000);
   h1_recoMjjWide_monitoring         = histoDir.make<TH1F>("recoMjjWide_monitoring", "recoMjjWide_monitoring", 14000, 0, 14000);
+  h1_recoMjjWide_l1monitoring         = histoDir.make<TH1F>("recoMjjWide_l1monitoring", "recoMjjWide_l1monitoring", 14000, 0, 14000);
   
   h1_recoDeltaEtajjWide_nominalHT250_monitoring = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT250_monitoring", "recoDeltaEtajjWide_nominalHT250_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajjWide_nominalHT250_l1monitoring = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT250_l1monitoring", "recoDeltaEtajjWide_nominalHT250_l1monitoring", 1000, 0, 5);
   h1_recoDeltaEtajjWide_nominalHT250            = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT250", "recoDeltaEtajjWide_nominalHT250", 1000, 0, 5);
   h1_recoDeltaEtajjWide_nominalHT410_monitoring = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT410_monitoring", "recoDeltaEtajjWide_nominalHT410_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajjWide_nominalHT410_l1monitoring = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT410_l1monitoring", "recoDeltaEtajjWide_nominalHT410_l1monitoring", 1000, 0, 5);
   h1_recoDeltaEtajjWide_nominalHT410            = histoDir.make<TH1F>("recoDeltaEtajjWide_nominalHT410", "recoDeltaEtajjWide_nominalHT410", 1000, 0, 5);
   h1_recoDeltaEtajjWide_monitoring         = histoDir.make<TH1F>("recoDeltaEtajjWide_monitoring", "recoDeltaEtajjWide_monitoring", 1000, 0, 5);
+  h1_recoDeltaEtajjWide_l1monitoring         = histoDir.make<TH1F>("recoDeltaEtajjWide_l1monitoring", "recoDeltaEtajjWide_l1monitoring", 1000, 0, 5);
   
 
   if (doJECs_) {
@@ -361,7 +406,7 @@ void
 HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-  //std::cout << "\nEVT" << std::endl;
+   //std::cout << "\nEVT" << std::endl;
    using namespace edm;
    passNominalHT250Trig=99;
    passNominalHT410Trig=99;
@@ -436,10 +481,12 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    std::vector<unsigned> sortedAK4JetIdx;
    std::multimap<double, unsigned> sortedAK4Jets;
 
+   //std::cout << "Begin ScoutingCaloJetCollection loop\n" << std::endl;
    for (ScoutingCaloJetCollection::const_iterator iCj = caloJetHandle->begin(); iCj != caloJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
      double correction = 1.0;
      if (doJECs_) {
+       //std::cout << "doJECs" << std::endl;
        JetCorrectorAK4_DATA->setJetEta(iCj->eta());
        JetCorrectorAK4_DATA->setJetPt(iCj->pt());
        JetCorrectorAK4_DATA->setJetA(iCj->jetArea());
@@ -451,26 +498,32 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
      sortedAK4Jets.insert(std::make_pair(cj1.Pt(), iCj - caloJetHandle->begin()));
      if (cj1.Pt() > 40. && fabs(cj1.Eta()) < 3.0) caloHT += cj1.Pt();
    }
+   //std::cout << "End ScoutingCaloJetCollection loop\n" << std::endl;
+
    // Get jet indices in decreasing pT order
    for (std::multimap<double, unsigned>::const_reverse_iterator it=sortedAK4Jets.rbegin(); it!=sortedAK4Jets.rend(); ++it) {
      sortedAK4JetIdx.push_back(it->second);
    }
    
-
+   //std::cout << "Begin ScoutingPFJetCollection loop\n" << std::endl;
    for (ScoutingPFJetCollection::const_iterator iCj = pfJetHandle->begin(); iCj != pfJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
      cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
      if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) pfHT += iCj->pt();
    }
+   //std::cout << "End ScoutingPFJetCollection loop\n" << std::endl;
 
+   //std::cout << "Begin pat::JetCollection loop\n" << std::endl;
    for (pat::JetCollection::const_iterator iCj = recoJetHandle->begin(); iCj != recoJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
      cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->mass());
      if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) recoHT += iCj->pt();
    }
+   //std::cout << "End pat::JetCollection loop\n" << std::endl;
       
    double wideJetDeltaR_ = 1.1;
 
+   //std::cout << "if caloJetHandle->size() = " <<  caloJetHandle->size() << std::endl;
    if (caloJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
@@ -525,7 +578,9 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        }
 
    } // end of two calo jets.
+   //std::cout << "end if caloJetHandle->size() = " <<  caloJetHandle->size() << std::endl;
 
+   //std::cout << "if pfJetHandle->size() = " <<  pfJetHandle->size() << std::endl;
    if (pfJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
@@ -579,8 +634,9 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        }
 
    } // end of two PF jets.
-
+   //std::cout << "end if pfJetHandle->size() = " <<  pfJetHandle->size() << std::endl;
    
+   //std::cout << "if recoJetHandle->size() = " <<  recoJetHandle->size() << std::endl;
    if (recoJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
@@ -634,6 +690,7 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
        }
 
    } // end of two RECO jets.
+   //std::cout << "end if recoJetHandle->size() = " <<  recoJetHandle->size() << std::endl;
    
    if (passNominalHT250Trig && passMonitoringTrig) {
      h1_caloHT_nominalHT250_monitoring->Fill(caloHT) ;

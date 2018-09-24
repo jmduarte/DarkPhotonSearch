@@ -1,0 +1,1 @@
+root://xrootd-cms.infn.it//store/data/Run2018D/ScoutingMonitor/MINIAOD/PromptReco-v2/000/322/431/00000/9AC67375-4AB8-E811-B5D8-FA163E0F0F4B.root

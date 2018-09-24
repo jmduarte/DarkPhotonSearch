@@ -1,0 +1,1 @@
+root://xrootd-cms.infn.it//store/data/Run2018D/ScoutingMonitor/RAW/v1/000/322/431/00000/C448CD58-39B3-E811-96F4-02163E015BEA.root
