@@ -41,15 +41,21 @@ process.TFileService = cms.Service("TFileService",
 ## )
 
 process.demo = cms.EDAnalyzer('HTScoutingL1Analyzer',
-     ## JECs ################
-     doJECs          = cms.bool(True),
-     L1corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L1FastJet_AK4CaloHLT.txt'),
-     L2corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L2Relative_AK4CaloHLT.txt'),
-     L3corrAK4_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L3Absolute_AK4CaloHLT.txt'),
+     ## JECs for Calo ################
+     doJECsCalo          = cms.bool(True),
+     L1corrAK4Calo_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L1FastJet_AK4CaloHLT.txt'),
+     L2corrAK4Calo_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L2Relative_AK4CaloHLT.txt'),
+     L3corrAK4Calo_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L3Absolute_AK4CaloHLT.txt'),
+     ## JECs for PF ################
+     doJECsPF          = cms.bool(True),
+     L1corrAK4PF_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L1FastJet_AK4PFHLT.txt'),
+     L2corrAK4PF_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L2Relative_AK4PFHLT.txt'),
+     L3corrAK4PF_DATA  = cms.FileInPath('DarkPhotonSearch/DimuonScoutingAnalyzer/data/102X_dataRun2_HLT_v2/102X_dataRun2_HLT_v2_L3Absolute_AK4PFHLT.txt'),
      triggerResults  = cms.InputTag("TriggerResults", "", "HLT"),
      caloJets        = cms.InputTag("hltScoutingCaloPacker", "", "HLT"),
      caloRho         = cms.InputTag("hltScoutingCaloPacker", "rho", "HLT"),
      pfJets          = cms.InputTag("hltScoutingPFPacker", "", "HLT"),
+     pfRho           = cms.InputTag("hltScoutingPFPacker", "rho", "HLT"),
      recoJets        = cms.InputTag("slimmedJets", "", "RECO"),
      muons           = cms.InputTag("hltScoutingMuonPacker", "", "HLT"),
 )
