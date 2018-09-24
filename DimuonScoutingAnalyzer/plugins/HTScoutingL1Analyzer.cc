@@ -40,6 +40,7 @@
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include <TLorentzVector.h>
+#include "TTree.h"
 #include "TH1.h"
 
 
@@ -67,6 +68,16 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   edm::EDGetTokenT<ScoutingMuonCollection>         muonLabel_;
   edm::Service<TFileService> fs;
 
+  TTree *tree;
+
+  int event=-1;
+  int run=-1;
+  int lumi=-1;
+
+  TBranch *br_event;
+  TBranch *br_run;
+  TBranch *br_lumi;
+
   int passNominalHT250Trig;
   int passNominalHT410Trig;
   int passMonitoringTrig;
@@ -91,6 +102,31 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   double recoMjjWide; 
   double recoDeltaEtajjWide;
   double recoDeltaPhijjWide;
+
+  TBranch *br_passNominalHT250Trig;
+  TBranch *br_passNominalHT410Trig;
+  TBranch *br_passMonitoringTrig;
+  TBranch *br_passL1MonitoringTrig;
+  TBranch *br_caloRho;
+  TBranch *br_caloHT;
+  TBranch *br_caloMjj;
+  TBranch *br_caloDeltaEtajj;
+  TBranch *br_caloMjjWide; 
+  TBranch *br_caloDeltaEtajjWide;
+  TBranch *br_caloDeltaPhijjWide;
+  TBranch *br_pfRho;
+  TBranch *br_pfHT;
+  TBranch *br_pfMjj;
+  TBranch *br_pfDeltaEtajj;
+  TBranch *br_pfMjjWide; 
+  TBranch *br_pfDeltaEtajjWide;
+  TBranch *br_pfDeltaPhijjWide;
+  TBranch *br_recoHT;
+  TBranch *br_recoMjj;
+  TBranch *br_recoDeltaEtajj;
+  TBranch *br_recoMjjWide; 
+  TBranch *br_recoDeltaEtajjWide;
+  TBranch *br_recoDeltaPhijjWide;
 
   TH1F *h1_caloHT_nominalHT250_monitoring;
   TH1F *h1_caloHT_nominalHT410_monitoring;
@@ -256,6 +292,38 @@ HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
   muonLabel_               = consumes<ScoutingMuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
   usesResource("TFileService");
 
+  tree = fs->make<TTree>("tree","tree");
+
+  br_event= (TBranch*)tree->Branch("event",&event,"event/I");
+  br_run= (TBranch*)tree->Branch("run",&run,"run/I");
+  br_lumi= (TBranch*)tree->Branch("lumi",&lumi,"lumi/I");
+
+  br_passNominalHT250Trig = (TBranch*)tree->Branch("passNominalHT250Trig", &passNominalHT250Trig, "passNominalHT250Trig/I");
+  br_passNominalHT410Trig = (TBranch*)tree->Branch("passNominalHT410Trig", &passNominalHT410Trig, "passNominalHT410Trig/I");
+  br_passMonitoringTrig = (TBranch*)tree->Branch("passMonitoringTrig", &passMonitoringTrig, "passMonitoringTrig/I");
+  br_passL1MonitoringTrig = (TBranch*)tree->Branch("passL1MonitoringTrig", &passL1MonitoringTrig, "passL1MonitoringTrig/I");
+  br_caloRho = (TBranch*)tree->Branch("caloRho", &caloRho, "caloRho/F");
+  br_caloHT = (TBranch*)tree->Branch("caloHT", &caloHT, "caloHT/F");
+  br_caloMjj = (TBranch*)tree->Branch("caloMjj", &caloMjj, "caloMjj/F");
+  br_caloDeltaEtajj = (TBranch*)tree->Branch("caloDeltaEtajj", &caloDeltaEtajj, "caloDeltaEtajj/F");
+  br_caloMjjWide = (TBranch*)tree->Branch("caloMjjWide", &caloMjjWide, "caloMjjWide/F");
+  br_caloDeltaEtajjWide = (TBranch*)tree->Branch("caloDeltaEtajjWide", &caloDeltaEtajjWide, "caloDeltaEtajjWide/F");
+  br_caloDeltaPhijjWide = (TBranch*)tree->Branch("caloDeltaPhijjWide", &caloDeltaPhijjWide, "caloDeltaPhijjWide/F");
+  br_pfRho = (TBranch*)tree->Branch("pfRho", &pfRho, "pfRho/F");
+  br_pfHT = (TBranch*)tree->Branch("pfHT", &pfHT, "pfHT/F");
+  br_pfMjj = (TBranch*)tree->Branch("pfMjj", &pfMjj, "pfMjj/F");
+  br_pfDeltaEtajj = (TBranch*)tree->Branch("pfDeltaEtajj", &pfDeltaEtajj, "pfDeltaEtajj/F");
+  br_pfMjjWide = (TBranch*)tree->Branch("pfMjjWide", &pfMjjWide, "pfMjjWide/F");
+  br_pfDeltaEtajjWide = (TBranch*)tree->Branch("pfDeltaEtajjWide", &pfDeltaEtajjWide, "pfDeltaEtajjWide/F");
+  br_pfDeltaPhijjWide = (TBranch*)tree->Branch("pfDeltaPhijjWide", &pfDeltaPhijjWide, "pfDeltaPhijjWide/F");
+  br_recoHT = (TBranch*)tree->Branch("recoHT", &recoHT, "recoHT/F");
+  br_recoMjj = (TBranch*)tree->Branch("recoMjj", &recoMjj, "recoMjj/F");
+  br_recoDeltaEtajj = (TBranch*)tree->Branch("recoDeltaEtajj", &recoDeltaEtajj, "recoDeltaEtajj/F");
+  br_recoMjjWide = (TBranch*)tree->Branch("recoMjjWide", &recoMjjWide, "recoMjjWide/F");
+  br_recoDeltaEtajjWide = (TBranch*)tree->Branch("recoDeltaEtajjWide", &recoDeltaEtajjWide, "recoDeltaEtajjWide/F");
+  br_recoDeltaPhijjWide = (TBranch*)tree->Branch("recoDeltaPhijjWide", &recoDeltaPhijjWide, "recoDeltaPhijjWide/F");
+
+  
   TFileDirectory histoDir = fs->mkdir("histoDir");
 
   h1_caloHT_nominalHT250_monitoring = histoDir.make<TH1F>("caloHT_nominalHT250_monitoring", "caloHT_nominalHT250_monitoring", 14000, 0, 14000);

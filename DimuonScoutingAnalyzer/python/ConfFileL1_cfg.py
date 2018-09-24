@@ -25,7 +25,8 @@ readParentFiles = cms.untracked.vstring( *myParentlist)
 process.source = cms.Source('PoolSource', 
                             fileNames = readFiles,
                             secondaryFileNames = readParentFiles,
-                            skipEvents = cms.untracked.uint32(54))
+                            skipEvents = cms.untracked.uint32(54)
+                            )
 
 import FWCore.PythonUtilities.LumiList as LumiList
 process.source.lumisToProcess = LumiList.LumiList(filename = 'json_DCSONLY.txt').getVLuminosityBlockRange()
