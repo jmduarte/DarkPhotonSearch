@@ -5,7 +5,7 @@ process = cms.Process("Demo")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 #process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
@@ -25,7 +25,7 @@ readParentFiles = cms.untracked.vstring( *myParentlist)
 process.source = cms.Source('PoolSource', 
                             fileNames = readFiles,
                             secondaryFileNames = readParentFiles,
-                            skipEvents = cms.untracked.uint32(54)
+                            #skipEvents = cms.untracked.uint32(54)
                             )
 
 import FWCore.PythonUtilities.LumiList as LumiList

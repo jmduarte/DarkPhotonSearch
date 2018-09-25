@@ -70,9 +70,9 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
 
   TTree *tree;
 
-  int event=-1;
-  int run=-1;
-  int lumi=-1;
+  uint event=0;
+  uint run=0;
+  uint lumi=0;
 
   TBranch *br_event;
   TBranch *br_run;
@@ -294,9 +294,9 @@ HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
 
   tree = fs->make<TTree>("tree","tree");
 
-  br_event= (TBranch*)tree->Branch("event",&event,"event/I");
-  br_run= (TBranch*)tree->Branch("run",&run,"run/I");
-  br_lumi= (TBranch*)tree->Branch("lumi",&lumi,"lumi/I");
+  br_event= (TBranch*)tree->Branch("event",&event,"event/i");
+  br_run= (TBranch*)tree->Branch("run",&run,"run/i");
+  br_lumi= (TBranch*)tree->Branch("lumi",&lumi,"lumi/i");
 
   br_passNominalHT250Trig = (TBranch*)tree->Branch("passNominalHT250Trig", &passNominalHT250Trig, "passNominalHT250Trig/I");
   br_passNominalHT410Trig = (TBranch*)tree->Branch("passNominalHT410Trig", &passNominalHT410Trig, "passNominalHT410Trig/I");
@@ -500,6 +500,10 @@ HTScoutingL1Analyzer::~HTScoutingL1Analyzer()
 void
 HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+
+   event = iEvent.id().event();
+   run   = iEvent.id().run();
+   lumi  = iEvent.luminosityBlock();
 
    //std::cout << "\nEVT" << std::endl;
    using namespace edm;
@@ -967,6 +971,8 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
      if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_l1monitoring->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_l1monitoring->Fill(recoDeltaEtajjWide) ;
    }
+
+   tree->Fill();
    
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
