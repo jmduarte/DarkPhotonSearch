@@ -28,7 +28,7 @@ def justHadd(options,args):
     
     filesToConvert = []
     badFiles = []
-    filesToConvert, badFiles = getFilesRecursively(DataDir,label+'/',None,None)
+    filesToConvert, badFiles = getFilesRecursively(DataDir,label+'/',None,'failed')
     print "files To Convert = ",filesToConvert
     print "bad files = ", badFiles
     cwd = os.getcwd()
@@ -81,23 +81,24 @@ def justHadd(options,args):
             exec_me('bsub -q 8nh -o $PWD/hadd_jobs/hadd_command_%s.log source $PWD/hadd_jobs/hadd_command_%s.sh'%(basename,basename),options.dryRun)
             
 
-def getFilesRecursively(dir,searchstring,additionalstring = None, skipString = None):
+def getFilesRecursively(dir, searchString, additionalString = None, skipString = None):
     
-    # thesearchstring = "_"+searchstring+"_"
-    thesearchstring = searchstring
-
-    theadditionalstring = None
-    if not additionalstring == None: 
-        theadditionalstring = additionalstring
-
     cfiles = []
     badfiles = []
-    for root, dirs, files in os.walk(dir+'/'+thesearchstring):
+    for root, dirs, files in os.walk(dir+'/'+searchString):
+        if skipString is not None and skipString in root: continue
+
         nfiles = len(files)
         for ifile, file in enumerate(files):
             
             if ifile%100==0:
-                print '%i/%i files checked in %s'%(ifile,nfiles,dir+'/'+thesearchstring)
+                print '%i/%i files checked in %s'%(ifile,nfiles,root)
+            if skipString is not None and skipString in file: 
+                print 'skipping %s due to skipString %s'%(file, skipString)
+                continue            
+            if '.root' not in file:
+                print 'skipping %s'%(file)
+                continue            
             try:
                 #f = ROOT.TFile.Open((os.path.join(root, file)).replace('eos','root://eoscms.cern.ch//eos'))
                 f = ROOT.TFile.Open((os.path.join(root, file)))
@@ -106,12 +107,12 @@ def getFilesRecursively(dir,searchstring,additionalstring = None, skipString = N
                     f.Close()
                     badfiles.append(os.path.join(root, file))                    
                     continue
-                elif not f.Get('Events'):
+                elif not f.Get('demo/tree'):
                     print 'tree is false'
                     f.Close()
                     badfiles.append(os.path.join(root, file))                    
                     continue
-                elif not f.Get('Events').InheritsFrom('TTree'):
+                elif not f.Get('demo/tree').InheritsFrom('TTree'):
                     print 'tree is not a tree'
                     f.Close()
                     badfiles.append(os.path.join(root, file))                    
