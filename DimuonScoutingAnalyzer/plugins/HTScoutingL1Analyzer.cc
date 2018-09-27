@@ -40,6 +40,7 @@
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include <TLorentzVector.h>
+#include "TTree.h"
 #include "TH1.h"
 
 
@@ -61,9 +62,21 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   edm::EDGetTokenT<ScoutingCaloJetCollection>      caloJetLabel_;
   edm::EDGetTokenT<double>                         caloRhoLabel_;
   edm::EDGetTokenT<ScoutingPFJetCollection>        pfJetLabel_;
+  edm::EDGetTokenT<double>                         pfRhoLabel_;
+  edm::EDGetTokenT<double>                         pfLabel_;
   edm::EDGetTokenT<pat::JetCollection>             recoJetLabel_;
   edm::EDGetTokenT<ScoutingMuonCollection>         muonLabel_;
   edm::Service<TFileService> fs;
+
+  TTree *tree;
+
+  uint event=0;
+  uint run=0;
+  uint lumi=0;
+
+  TBranch *br_event;
+  TBranch *br_run;
+  TBranch *br_lumi;
 
   int passNominalHT250Trig;
   int passNominalHT410Trig;
@@ -76,6 +89,7 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   double caloMjjWide; 
   double caloDeltaEtajjWide;
   double caloDeltaPhijjWide;
+  double pfRho;
   double pfHT;
   double pfMjj;
   double pfDeltaEtajj;
@@ -88,6 +102,31 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   double recoMjjWide; 
   double recoDeltaEtajjWide;
   double recoDeltaPhijjWide;
+
+  TBranch *br_passNominalHT250Trig;
+  TBranch *br_passNominalHT410Trig;
+  TBranch *br_passMonitoringTrig;
+  TBranch *br_passL1MonitoringTrig;
+  TBranch *br_caloRho;
+  TBranch *br_caloHT;
+  TBranch *br_caloMjj;
+  TBranch *br_caloDeltaEtajj;
+  TBranch *br_caloMjjWide; 
+  TBranch *br_caloDeltaEtajjWide;
+  TBranch *br_caloDeltaPhijjWide;
+  TBranch *br_pfRho;
+  TBranch *br_pfHT;
+  TBranch *br_pfMjj;
+  TBranch *br_pfDeltaEtajj;
+  TBranch *br_pfMjjWide; 
+  TBranch *br_pfDeltaEtajjWide;
+  TBranch *br_pfDeltaPhijjWide;
+  TBranch *br_recoHT;
+  TBranch *br_recoMjj;
+  TBranch *br_recoDeltaEtajj;
+  TBranch *br_recoMjjWide; 
+  TBranch *br_recoDeltaEtajjWide;
+  TBranch *br_recoDeltaPhijjWide;
 
   TH1F *h1_caloHT_nominalHT250_monitoring;
   TH1F *h1_caloHT_nominalHT410_monitoring;
@@ -217,24 +256,35 @@ class HTScoutingL1Analyzer : public edm::one::EDAnalyzer<edm::one::SharedResourc
   TH1F *h1_recoDeltaEtajjWide_l1monitoring;
 
   // for JECs
-  bool doJECs_;
-  edm::FileInPath L1corrAK4_DATA_, L2corrAK4_DATA_, L3corrAK4_DATA_,ResCorrAK4_DATA_;
-  JetCorrectorParameters *L1ParAK4_DATA;
-  JetCorrectorParameters *L2ParAK4_DATA;
-  JetCorrectorParameters *L3ParAK4_DATA;
-  JetCorrectorParameters *L2L3ResAK4_DATA;
-  FactorizedJetCorrector *JetCorrectorAK4_DATA;
+  bool doJECsCalo_, doJECsPF_;
+  edm::FileInPath L1corrAK4Calo_DATA_, L2corrAK4Calo_DATA_, L3corrAK4Calo_DATA_,ResCorrAK4Calo_DATA_;
+  edm::FileInPath L1corrAK4PF_DATA_, L2corrAK4PF_DATA_, L3corrAK4PF_DATA_,ResCorrAK4PF_DATA_;
+  JetCorrectorParameters *L1ParAK4Calo_DATA;
+  JetCorrectorParameters *L2ParAK4Calo_DATA;
+  JetCorrectorParameters *L3ParAK4Calo_DATA;
+  JetCorrectorParameters *L2L3ResAK4Calo_DATA;
+  FactorizedJetCorrector *JetCorrectorAK4Calo_DATA;
+  JetCorrectorParameters *L1ParAK4PF_DATA;
+  JetCorrectorParameters *L2ParAK4PF_DATA;
+  JetCorrectorParameters *L3ParAK4PF_DATA;
+  JetCorrectorParameters *L2L3ResAK4PF_DATA;
+  FactorizedJetCorrector *JetCorrectorAK4PF_DATA;
 };
 
 
 HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
 
 {
-  doJECs_                  = iConfig.getParameter<bool>("doJECs");
-  L1corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L1corrAK4_DATA");
-  L2corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L2corrAK4_DATA");
-  L3corrAK4_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4_DATA");
+  doJECsCalo_                  = iConfig.getParameter<bool>("doJECsCalo");
+  L1corrAK4Calo_DATA_          = iConfig.getParameter<edm::FileInPath>("L1corrAK4Calo_DATA");
+  L2corrAK4Calo_DATA_          = iConfig.getParameter<edm::FileInPath>("L2corrAK4Calo_DATA");
+  L3corrAK4Calo_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4Calo_DATA");
+  doJECsPF_                  = iConfig.getParameter<bool>("doJECsPF");
+  L1corrAK4PF_DATA_          = iConfig.getParameter<edm::FileInPath>("L1corrAK4PF_DATA");
+  L2corrAK4PF_DATA_          = iConfig.getParameter<edm::FileInPath>("L2corrAK4PF_DATA");
+  L3corrAK4PF_DATA_          = iConfig.getParameter<edm::FileInPath>("L3corrAK4PF_DATA");
   caloRhoLabel_            = consumes<double>(iConfig.getParameter<edm::InputTag>("caloRho")),
+  pfRhoLabel_            = consumes<double>(iConfig.getParameter<edm::InputTag>("pfRho")),
   trgResultsLabel_         = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
   caloJetLabel_            = consumes<ScoutingCaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJets"));
   pfJetLabel_              = consumes<ScoutingPFJetCollection>(iConfig.getParameter<edm::InputTag>("pfJets"));
@@ -242,6 +292,38 @@ HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
   muonLabel_               = consumes<ScoutingMuonCollection>(iConfig.getParameter<edm::InputTag>("muons"));
   usesResource("TFileService");
 
+  tree = fs->make<TTree>("tree","tree");
+
+  br_event= (TBranch*)tree->Branch("event",&event,"event/i");
+  br_run= (TBranch*)tree->Branch("run",&run,"run/i");
+  br_lumi= (TBranch*)tree->Branch("lumi",&lumi,"lumi/i");
+
+  br_passNominalHT250Trig = (TBranch*)tree->Branch("passNominalHT250Trig", &passNominalHT250Trig, "passNominalHT250Trig/I");
+  br_passNominalHT410Trig = (TBranch*)tree->Branch("passNominalHT410Trig", &passNominalHT410Trig, "passNominalHT410Trig/I");
+  br_passMonitoringTrig = (TBranch*)tree->Branch("passMonitoringTrig", &passMonitoringTrig, "passMonitoringTrig/I");
+  br_passL1MonitoringTrig = (TBranch*)tree->Branch("passL1MonitoringTrig", &passL1MonitoringTrig, "passL1MonitoringTrig/I");
+  br_caloRho = (TBranch*)tree->Branch("caloRho", &caloRho, "caloRho/D");
+  br_caloHT = (TBranch*)tree->Branch("caloHT", &caloHT, "caloHT/D");
+  br_caloMjj = (TBranch*)tree->Branch("caloMjj", &caloMjj, "caloMjj/D");
+  br_caloDeltaEtajj = (TBranch*)tree->Branch("caloDeltaEtajj", &caloDeltaEtajj, "caloDeltaEtajj/D");
+  br_caloMjjWide = (TBranch*)tree->Branch("caloMjjWide", &caloMjjWide, "caloMjjWide/D");
+  br_caloDeltaEtajjWide = (TBranch*)tree->Branch("caloDeltaEtajjWide", &caloDeltaEtajjWide, "caloDeltaEtajjWide/D");
+  br_caloDeltaPhijjWide = (TBranch*)tree->Branch("caloDeltaPhijjWide", &caloDeltaPhijjWide, "caloDeltaPhijjWide/D");
+  br_pfRho = (TBranch*)tree->Branch("pfRho", &pfRho, "pfRho/D");
+  br_pfHT = (TBranch*)tree->Branch("pfHT", &pfHT, "pfHT/D");
+  br_pfMjj = (TBranch*)tree->Branch("pfMjj", &pfMjj, "pfMjj/D");
+  br_pfDeltaEtajj = (TBranch*)tree->Branch("pfDeltaEtajj", &pfDeltaEtajj, "pfDeltaEtajj/D");
+  br_pfMjjWide = (TBranch*)tree->Branch("pfMjjWide", &pfMjjWide, "pfMjjWide/D");
+  br_pfDeltaEtajjWide = (TBranch*)tree->Branch("pfDeltaEtajjWide", &pfDeltaEtajjWide, "pfDeltaEtajjWide/D");
+  br_pfDeltaPhijjWide = (TBranch*)tree->Branch("pfDeltaPhijjWide", &pfDeltaPhijjWide, "pfDeltaPhijjWide/D");
+  br_recoHT = (TBranch*)tree->Branch("recoHT", &recoHT, "recoHT/D");
+  br_recoMjj = (TBranch*)tree->Branch("recoMjj", &recoMjj, "recoMjj/D");
+  br_recoDeltaEtajj = (TBranch*)tree->Branch("recoDeltaEtajj", &recoDeltaEtajj, "recoDeltaEtajj/D");
+  br_recoMjjWide = (TBranch*)tree->Branch("recoMjjWide", &recoMjjWide, "recoMjjWide/D");
+  br_recoDeltaEtajjWide = (TBranch*)tree->Branch("recoDeltaEtajjWide", &recoDeltaEtajjWide, "recoDeltaEtajjWide/D");
+  br_recoDeltaPhijjWide = (TBranch*)tree->Branch("recoDeltaPhijjWide", &recoDeltaPhijjWide, "recoDeltaPhijjWide/D");
+
+  
   TFileDirectory histoDir = fs->mkdir("histoDir");
 
   h1_caloHT_nominalHT250_monitoring = histoDir.make<TH1F>("caloHT_nominalHT250_monitoring", "caloHT_nominalHT250_monitoring", 14000, 0, 14000);
@@ -380,17 +462,30 @@ HTScoutingL1Analyzer::HTScoutingL1Analyzer(const edm::ParameterSet& iConfig)
   h1_recoDeltaEtajjWide_l1monitoring         = histoDir.make<TH1F>("recoDeltaEtajjWide_l1monitoring", "recoDeltaEtajjWide_l1monitoring", 1000, 0, 5);
   
 
-  if (doJECs_) {
-    L1ParAK4_DATA = new JetCorrectorParameters(L1corrAK4_DATA_.fullPath());
-    L2ParAK4_DATA = new JetCorrectorParameters(L2corrAK4_DATA_.fullPath());
-    L3ParAK4_DATA = new JetCorrectorParameters(L3corrAK4_DATA_.fullPath());
+  if (doJECsCalo_) {
+    L1ParAK4Calo_DATA = new JetCorrectorParameters(L1corrAK4Calo_DATA_.fullPath());
+    L2ParAK4Calo_DATA = new JetCorrectorParameters(L2corrAK4Calo_DATA_.fullPath());
+    L3ParAK4Calo_DATA = new JetCorrectorParameters(L3corrAK4Calo_DATA_.fullPath());
 
-    std::vector<JetCorrectorParameters> vParAK4_DATA;
-    vParAK4_DATA.push_back(*L1ParAK4_DATA);
-    vParAK4_DATA.push_back(*L2ParAK4_DATA);
-    vParAK4_DATA.push_back(*L3ParAK4_DATA);
+    std::vector<JetCorrectorParameters> vParAK4Calo_DATA;
+    vParAK4Calo_DATA.push_back(*L1ParAK4Calo_DATA);
+    vParAK4Calo_DATA.push_back(*L2ParAK4Calo_DATA);
+    vParAK4Calo_DATA.push_back(*L3ParAK4Calo_DATA);
 
-    JetCorrectorAK4_DATA = new FactorizedJetCorrector(vParAK4_DATA);
+    JetCorrectorAK4Calo_DATA = new FactorizedJetCorrector(vParAK4Calo_DATA);
+  }
+
+  if (doJECsPF_) {
+    L1ParAK4PF_DATA = new JetCorrectorParameters(L1corrAK4PF_DATA_.fullPath());
+    L2ParAK4PF_DATA = new JetCorrectorParameters(L2corrAK4PF_DATA_.fullPath());
+    L3ParAK4PF_DATA = new JetCorrectorParameters(L3corrAK4PF_DATA_.fullPath());
+
+    std::vector<JetCorrectorParameters> vParAK4PF_DATA;
+    vParAK4PF_DATA.push_back(*L1ParAK4PF_DATA);
+    vParAK4PF_DATA.push_back(*L2ParAK4PF_DATA);
+    vParAK4PF_DATA.push_back(*L3ParAK4PF_DATA);
+
+    JetCorrectorAK4PF_DATA = new FactorizedJetCorrector(vParAK4PF_DATA);
   }
 }
 
@@ -405,6 +500,10 @@ HTScoutingL1Analyzer::~HTScoutingL1Analyzer()
 void
 HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+
+   event = iEvent.id().event();
+   run   = iEvent.id().run();
+   lumi  = iEvent.luminosityBlock();
 
    //std::cout << "\nEVT" << std::endl;
    using namespace edm;
@@ -471,48 +570,75 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
    edm::Handle<ScoutingPFJetCollection> pfJetHandle;
    iEvent.getByToken(pfJetLabel_, pfJetHandle);
+   
+   edm::Handle<double> pfRhoHandle;
+   iEvent.getByToken(pfRhoLabel_, pfRhoHandle);
+   pfRho = *pfRhoHandle;
 
    edm::Handle<pat::JetCollection> recoJetHandle;
    iEvent.getByToken(recoJetLabel_, recoJetHandle);
    
-   //JEC factors
-   std::vector<double> jecFactorsAK4;
+   //JEC Calo factors
+   std::vector<double> jecFactorsAK4Calo;
    // Sort AK4 jets by increasing pT
-   std::vector<unsigned> sortedAK4JetIdx;
-   std::multimap<double, unsigned> sortedAK4Jets;
+   std::vector<unsigned> sortedAK4CaloJetIdx;
+   std::multimap<double, unsigned> sortedAK4CaloJets;
 
    //std::cout << "Begin ScoutingCaloJetCollection loop\n" << std::endl;
    for (ScoutingCaloJetCollection::const_iterator iCj = caloJetHandle->begin(); iCj != caloJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
      double correction = 1.0;
-     if (doJECs_) {
-       //std::cout << "doJECs" << std::endl;
-       JetCorrectorAK4_DATA->setJetEta(iCj->eta());
-       JetCorrectorAK4_DATA->setJetPt(iCj->pt());
-       JetCorrectorAK4_DATA->setJetA(iCj->jetArea());
-       JetCorrectorAK4_DATA->setRho(caloRho);
-       correction = JetCorrectorAK4_DATA->getCorrection();
+     if (doJECsCalo_) {
+       //std::cout << "doJECsCalo" << std::endl;
+       JetCorrectorAK4Calo_DATA->setJetEta(iCj->eta());
+       JetCorrectorAK4Calo_DATA->setJetPt(iCj->pt());
+       JetCorrectorAK4Calo_DATA->setJetA(iCj->jetArea());
+       JetCorrectorAK4Calo_DATA->setRho(caloRho);
+       correction = JetCorrectorAK4Calo_DATA->getCorrection();
      }
-     jecFactorsAK4.push_back(correction);
+     jecFactorsAK4Calo.push_back(correction);
      cj1.SetPtEtaPhiM(iCj->pt()*correction, iCj->eta(), iCj->phi(), iCj->m());
-     sortedAK4Jets.insert(std::make_pair(cj1.Pt(), iCj - caloJetHandle->begin()));
+     sortedAK4CaloJets.insert(std::make_pair(cj1.Pt(), iCj - caloJetHandle->begin()));
      if (cj1.Pt() > 40. && fabs(cj1.Eta()) < 3.0) caloHT += cj1.Pt();
    }
    //std::cout << "End ScoutingCaloJetCollection loop\n" << std::endl;
 
-   // Get jet indices in decreasing pT order
-   for (std::multimap<double, unsigned>::const_reverse_iterator it=sortedAK4Jets.rbegin(); it!=sortedAK4Jets.rend(); ++it) {
-     sortedAK4JetIdx.push_back(it->second);
+   // Get Calo jet indices in decreasing pT order
+   for (std::multimap<double, unsigned>::const_reverse_iterator it=sortedAK4CaloJets.rbegin(); it!=sortedAK4CaloJets.rend(); ++it) {
+     sortedAK4CaloJetIdx.push_back(it->second);
    }
    
+   //JEC PF factors
+   std::vector<double> jecFactorsAK4PF;
+   // Sort AK4 jets by increasing pT
+   std::vector<unsigned> sortedAK4PFJetIdx;
+   std::multimap<double, unsigned> sortedAK4PFJets;
+
    //std::cout << "Begin ScoutingPFJetCollection loop\n" << std::endl;
    for (ScoutingPFJetCollection::const_iterator iCj = pfJetHandle->begin(); iCj != pfJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
-     cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
+     //cj1.SetPtEtaPhiM(iCj->pt(), iCj->eta(), iCj->phi(), iCj->m());
+     double correction = 1.0;
+     if (doJECsPF_) {
+       //std::cout << "doJECsPF" << std::endl;
+       JetCorrectorAK4PF_DATA->setJetEta(iCj->eta());
+       JetCorrectorAK4PF_DATA->setJetPt(iCj->pt());
+       JetCorrectorAK4PF_DATA->setJetA(iCj->jetArea());
+       JetCorrectorAK4PF_DATA->setRho(pfRho);
+       correction = JetCorrectorAK4PF_DATA->getCorrection();
+     }
+     jecFactorsAK4PF.push_back(correction);
+     cj1.SetPtEtaPhiM(iCj->pt()*correction, iCj->eta(), iCj->phi(), iCj->m());
+     sortedAK4PFJets.insert(std::make_pair(cj1.Pt(), iCj - pfJetHandle->begin()));
      if (iCj->pt() > 40. && fabs(iCj->eta()) < 3.0) pfHT += iCj->pt();
    }
    //std::cout << "End ScoutingPFJetCollection loop\n" << std::endl;
 
+   // Get PF jet indices in decreasing pT order
+   for (std::multimap<double, unsigned>::const_reverse_iterator it=sortedAK4PFJets.rbegin(); it!=sortedAK4PFJets.rend(); ++it) {
+     sortedAK4PFJetIdx.push_back(it->second);
+   }
+   
    //std::cout << "Begin pat::JetCollection loop\n" << std::endl;
    for (pat::JetCollection::const_iterator iCj = recoJetHandle->begin(); iCj != recoJetHandle->end(); ++iCj) {	   
      TLorentzVector cj1;
@@ -527,19 +653,19 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    if (caloJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
-     const ScoutingCaloJet & iCj = (*caloJetHandle)[ sortedAK4JetIdx[0] ];
-     const ScoutingCaloJet & jCj = (*caloJetHandle)[ sortedAK4JetIdx[1] ];
+     const ScoutingCaloJet & iCj = (*caloJetHandle)[ sortedAK4CaloJetIdx[0] ];
+     const ScoutingCaloJet & jCj = (*caloJetHandle)[ sortedAK4CaloJetIdx[1] ];
      TLorentzVector jet1, jet2;
-     jet1.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[0] ]*(iCj.pt()), iCj.eta(), iCj.phi(), iCj.m());
-     jet2.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[1] ]*(jCj.pt()), jCj.eta(), jCj.phi(), jCj.m());
+     jet1.SetPtEtaPhiM(jecFactorsAK4Calo[ sortedAK4CaloJetIdx[0] ]*(iCj.pt()), iCj.eta(), iCj.phi(), iCj.m());
+     jet2.SetPtEtaPhiM(jecFactorsAK4Calo[ sortedAK4CaloJetIdx[1] ]*(jCj.pt()), jCj.eta(), jCj.phi(), jCj.m());
      if (jet1.Pt() > 60. && fabs(jet1.Eta()) < 2.5) {	 
        if (jet2.Pt() > 30. && fabs(jet2.Eta()) < 2.5) {
 	 caloMjj = (jet1+jet2).M();
 	 caloDeltaEtajj = fabs(jet1.Eta()-jet2.Eta());
 	 for(size_t ijet=0; ijet<caloJetHandle->size(); ijet++) {
-	   const ScoutingCaloJet & kCj = (*caloJetHandle)[ sortedAK4JetIdx[ijet] ];
+	   const ScoutingCaloJet & kCj = (*caloJetHandle)[ sortedAK4CaloJetIdx[ijet] ];
 	   TLorentzVector currentJet;
-	   currentJet.SetPtEtaPhiM(jecFactorsAK4[ sortedAK4JetIdx[ijet] ]*(kCj.pt()), kCj.eta(), kCj.phi(), kCj.m());	     
+	   currentJet.SetPtEtaPhiM(jecFactorsAK4Calo[ sortedAK4CaloJetIdx[ijet] ]*(kCj.pt()), kCj.eta(), kCj.phi(), kCj.m());	     
 	   if (currentJet.Pt() > 30. && fabs(currentJet.Eta()) < 2.5) {
 	     double DeltaR1 = currentJet.DeltaR(jet1);
 	     double DeltaR2 = currentJet.DeltaR(jet2);			   
@@ -584,19 +710,20 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
    if (pfJetHandle->size() > 2){     
      TLorentzVector wj1, wj2, wdijet;
      TLorentzVector wj1_tmp, wj2_tmp;
-     const ScoutingPFJet & iCj = (*pfJetHandle)[ 0 ];
-     const ScoutingPFJet & jCj = (*pfJetHandle)[ 1 ];
+     const ScoutingPFJet & iCj = (*pfJetHandle)[ sortedAK4PFJetIdx[0] ];
+     const ScoutingPFJet & jCj = (*pfJetHandle)[ sortedAK4PFJetIdx[1] ];
      if (iCj.pt() > 60. && fabs(iCj.eta()) < 2.5) {	 
        if (jCj.pt() > 30. && fabs(jCj.eta()) < 2.5) {
 	 TLorentzVector jet1, jet2;
-	 jet1.SetPtEtaPhiM(iCj.pt(), iCj.eta(), iCj.phi(), iCj.m());
-	 jet2.SetPtEtaPhiM(jCj.pt(), jCj.eta(), jCj.phi(), jCj.m());
+         jet1.SetPtEtaPhiM(jecFactorsAK4PF[ sortedAK4PFJetIdx[0] ]*(iCj.pt()), iCj.eta(), iCj.phi(), iCj.m());
+         jet2.SetPtEtaPhiM(jecFactorsAK4PF[ sortedAK4PFJetIdx[1] ]*(jCj.pt()), jCj.eta(), jCj.phi(), jCj.m());
 	 pfMjj = (jet1+jet2).M();
 	 pfDeltaEtajj = fabs(jet1.Eta()-jet2.Eta());
-	 for (ScoutingPFJetCollection::const_iterator kCj = pfJetHandle->begin(); kCj != pfJetHandle->end(); ++kCj) {
+	 for(size_t ijet=0; ijet<pfJetHandle->size(); ijet++) {
+	   const ScoutingPFJet & kCj = (*pfJetHandle)[ sortedAK4PFJetIdx[ijet] ];
 	   TLorentzVector currentJet;
-	   if (kCj->pt() > 30. && fabs(kCj->eta()) < 2.5) {
-	     currentJet.SetPtEtaPhiM(kCj->pt(), kCj->eta(), kCj->phi(), kCj->m());			   
+	   currentJet.SetPtEtaPhiM(jecFactorsAK4PF[ sortedAK4PFJetIdx[ijet] ]*(kCj.pt()), kCj.eta(), kCj.phi(), kCj.m());	     
+	   if (currentJet.Pt() > 30. && fabs(currentJet.Eta()) < 2.5) {
 	     double DeltaR1 = currentJet.DeltaR(jet1);
 	     double DeltaR2 = currentJet.DeltaR(jet2);			   
 	     if(DeltaR1 < DeltaR2 && DeltaR1 < wideJetDeltaR_)
@@ -844,6 +971,8 @@ HTScoutingL1Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& i
      if (recoDeltaEtajjWide > -1 && recoDeltaEtajjWide < 1.3) h1_recoMjjWide_l1monitoring->Fill(recoMjjWide) ;
      h1_recoDeltaEtajjWide_l1monitoring->Fill(recoDeltaEtajjWide) ;
    }
+
+   tree->Fill();
    
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
